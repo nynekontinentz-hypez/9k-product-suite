@@ -1,0 +1,47 @@
+<%- include('../partials/page-start', { title: 'Clients', user, isAdmin: true, activePath: '/admin/clients' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">Clients</div>
+  <div class="topbar-actions">
+    <a href="/admin/clients/new" class="btn btn-primary btn-sm">+ New Client</a>
+  </div>
+</div>
+<div class="page">
+  <div class="card" style="padding:0">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Company</th><th>Contact</th><th>Email</th><th>Plan</th><th>Health</th><th>Endpoints</th><th>Since</th>
+        </tr></thead>
+        <tbody>
+          <% if (clients.length === 0) { %>
+          <tr><td colspan="7"><div class="empty-state">No clients yet. <a href="/admin/clients/new">Add the first one.</a></div></td></tr>
+          <% } else { %>
+          <% clients.forEach(function(c) { %>
+          <tr>
+            <td><a href="/admin/clients/<%= c.id %>" class="table-link"><%= c.company_name %></a></td>
+            <td class="text-sm"><%= c.primary_contact_name %></td>
+            <td class="text-sm text-muted"><%= c.primary_contact_email %></td>
+            <td>
+              <% if (c.tier_name) { %>
+              <span class="badge badge-tier"><%= c.tier_name %></span>
+              <% } else { %>
+              <span class="text-muted">—</span>
+              <% } %>
+            </td>
+            <td>
+              <% var health = c.account_health || 'good'; %>
+              <span class="badge badge-<%= health === 'good' ? 'closed' : health === 'at-risk' ? 'high' : 'normal' %>"><%= health %></span>
+            </td>
+            <td class="text-muted"><%= c.endpoint_count || 0 %></td>
+            <td class="text-muted text-sm"><%= new Date(c.created_at).toLocaleDateString() %></td>
+          </tr>
+          <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>

@@ -1,0 +1,26 @@
+<%- include('../partials/page-start', { title: 'MSP Playbooks', user, isAdmin: true, activePath: '/admin/playbooks' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">MSP Playbooks</div>
+</div>
+
+<div class="page">
+  <div class="mb-4">
+    <div class="text-muted text-sm">Industry-specific sales and technical guides for NineKOS.</div>
+  </div>
+
+  <div class="grid grid-cols-3 gap-4">
+    <% playbooks.forEach(function(pb) { %>
+    <a href="/admin/playbooks/<%= pb.id %>" class="card card-hover" style="text-decoration:none">
+      <div class="flex items-center justify-between mb-2">
+        <div class="font-bold text-accent" style="text-transform: capitalize;"><%= pb.name %></div>
+        <div class="text-xs text-muted">MD</div>
+      </div>
+      <p class="text-xs text-muted mb-3">Target niche, tech stack, and service packages for <%= pb.name %>.</p>
+      <div class="btn btn-secondary btn-sm w-full">View Playbook</div>
+    </a>
+    <% }) %>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>

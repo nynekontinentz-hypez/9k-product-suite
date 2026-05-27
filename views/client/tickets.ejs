@@ -1,0 +1,43 @@
+<%- include('../partials/page-start', { title: 'My Tickets', user, isAdmin: false, activePath: '/client/tickets' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">My Tickets</div>
+  <div class="topbar-actions">
+    <a href="/client/tickets/new" class="btn btn-primary btn-sm">+ New Ticket</a>
+  </div>
+</div>
+<div class="page">
+  <% if (tickets.length === 0) { %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="empty-icon">◎</div>
+      <p>You haven't submitted any tickets yet.</p>
+      <a href="/client/tickets/new" class="btn btn-primary mt-2">Submit your first request</a>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="card" style="padding:0">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Title</th><th>Category</th><th>Urgency</th><th>Status</th><th>Updated</th>
+        </tr></thead>
+        <tbody>
+          <% tickets.forEach(function(t) { %>
+          <tr>
+            <td class="text-muted">#<%= t.id %></td>
+            <td><a href="/client/tickets/<%= t.id %>" class="table-link"><%= t.title %></a></td>
+            <td class="text-muted"><%= t.category %></td>
+            <td><span class="badge badge-<%= t.urgency %>"><%= t.urgency %></span></td>
+            <td><span class="badge badge-<%= t.status.replace('_','-') %>"><%= t.status.replace('_',' ') %></span></td>
+            <td class="text-muted text-sm"><%= new Date(t.updated_at).toLocaleDateString() %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<%- include('../partials/page-end') %>

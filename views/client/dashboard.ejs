@@ -1,0 +1,93 @@
+<%- include('../partials/page-start', { title: 'Dashboard', user, isAdmin: false, activePath: '/client' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">Dashboard</div>
+  <div class="topbar-actions">
+    <a href="/client/tickets/new" class="btn btn-primary btn-sm">+ New Ticket</a>
+  </div>
+</div>
+<div class="page">
+
+  <% if (contract) { %>
+  <div class="tier-card mb-4">
+    <div class="tier-name"><%= client.tier_name || 'Plan' %></div>
+    <div class="tier-price">$<%= client.tier_price || contract.monthly_rate %>/mo — Active contract</div>
+    <% if (contract.features) { %>
+    <ul class="tier-features">
+      <% contract.features.split(',').forEach(function(f) { %>
+        <li><%= f.trim() %></li>
+      <% }) %>
+    </ul>
+    <% } %>
+  </div>
+  <% } %>
+
+  <div class="stats-grid">
+    <div class="stat-card <%= openCount > 0 ? 'accent' : '' %>">
+      <div class="stat-label">Open Tickets</div>
+      <div class="stat-value"><%= openCount %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Tickets</div>
+      <div class="stat-value"><%= tickets.length %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Plan</div>
+      <div class="stat-value" style="font-size:1.1rem;padding-top:4px"><%= client.tier_name || '—' %></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Recent Tickets</div>
+      <a href="/client/tickets" class="text-sm text-accent">View all →</a>
+    </div>
+    <% if (tickets.length === 0) { %>
+    <div class="card">
+      <div class="empty-state">
+        <div class="empty-icon">◎</div>
+        <p>No tickets yet. <a href="/client/tickets/new">Submit your first request.</a></p>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="card" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Title</th><th>Category</th><th>Urgency</th><th>Status</th><th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% tickets.forEach(function(t) { %>
+            <tr>
+              <td class="text-muted">#<%= t.id %></td>
+              <td><a href="/client/tickets/<%= t.id %>" class="table-link"><%= t.title %></a></td>
+              <td class="text-muted"><%= t.category %></td>
+              <td><span class="badge badge-<%= t.urgency %>"><%= t.urgency %></span></td>
+              <td><span class="badge badge-<%= t.status.replace('_','-') %>"><%= t.status.replace('_',' ') %></span></td>
+              <td class="text-muted text-sm"><%= new Date(t.created_at).toLocaleDateString() %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <div class="section">
+    <div class="card" style="padding:16px 24px">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="font-medium">Need to update your environment details?</div>
+          <div class="text-muted text-sm">Asset count, cloud services, emergency contact</div>
+        </div>
+        <a href="/client/onboarding" class="btn btn-secondary btn-sm">Update environment →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('../partials/page-end') %>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' — ' : '' %>9K Systems Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/public/css/app.css">
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">9K <span>SYSTEMS</span></div>
+    <nav class="sidebar-nav">
+      <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+        <div class="sidebar-section">Overview</div>
+        <a href="/admin" class="<%= activePath === '/admin' ? 'active' : '' %>">
+          <span class="icon">⬡</span> Dashboard
+        </a>
+        <div class="sidebar-section">Manage</div>
+        <a href="/admin/clients" class="<%= activePath && activePath.startsWith('/admin/clients') ? 'active' : '' %>">
+          <span class="icon">◉</span> Clients
+        </a>
+        <a href="/admin/tickets" class="<%= activePath && activePath.startsWith('/admin/tickets') ? 'active' : '' %>">
+          <span class="icon">◎</span> Tickets
+        </a>
+        <a href="/admin/playbooks" class="<%= activePath && activePath.startsWith('/admin/playbooks') ? 'active' : '' %>">
+          <span class="icon">▤</span> Playbooks
+        </a>
+      <% } else { %>
+        <div class="sidebar-section">Portal</div>
+        <a href="/client" class="<%= activePath === '/client' ? 'active' : '' %>">
+          <span class="icon">⬡</span> Dashboard
+        </a>
+        <a href="/client/tickets" class="<%= activePath && activePath.startsWith('/client/tickets') ? 'active' : '' %>">
+          <span class="icon">◎</span> My Tickets
+        </a>
+        <a href="/client/tickets/new" class="<%= activePath === '/client/tickets/new' ? 'active' : '' %>">
+          <span class="icon">＋</span> New Ticket
+        </a>
+        <a href="/client/onboarding" class="<%= activePath && activePath.startsWith('/client/onboarding') ? 'active' : '' %>">
+          <span class="icon">◈</span> Environment
+        </a>
+      <% } %>
+    </nav>
+    <div class="sidebar-footer">
+      <strong><%= user && (user.name || user.company_name) || 'User' %></strong>
+      <span class="text-xs"><%= user && user.email || '' %></span>
+      <form method="POST" action="<%= isAdmin ? '/admin/logout' : '/logout' %>" style="margin-top:10px">
+        <button type="submit" class="btn btn-secondary btn-sm" style="width:100%">Sign out</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="main">

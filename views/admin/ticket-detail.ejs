@@ -1,0 +1,107 @@
+<% var statusOptions = ['open','in_progress','on_hold','closed']; %>
+<% var statusLabel = { open:'Open', in_progress:'In Progress', on_hold:'On Hold', closed:'Closed' }; %>
+<% var statusColor = { open:'badge-open', in_progress:'badge-in-progress', on_hold:'badge-on-hold', closed:'badge-closed' }; %>
+<%- include('../partials/page-start', { title: 'Ticket #' + ticket.id, user, isAdmin: true, activePath: '/admin/tickets' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">Ticket #<%= ticket.id %></div>
+  <div class="topbar-actions">
+    <a href="/admin/tickets" class="btn btn-secondary btn-sm">← All tickets</a>
+  </div>
+</div>
+<div class="page">
+  <div id="update-toast"></div>
+
+  <div class="content-grid">
+    <div>
+      <div class="card mb-3">
+        <h2 style="font-size:1.1rem;margin-bottom:6px"><%= ticket.title %></h2>
+        <div class="flex gap-2 mb-3">
+          <span class="badge badge-<%= ticket.urgency %>"><%= ticket.urgency %></span>
+          <span class="badge <%= statusColor[ticket.status] %>" id="status-badge"><%= statusLabel[ticket.status] %></span>
+          <a href="/admin/clients/<%= ticket.client_id %>" class="text-muted text-sm"><%= ticket.company_name %></a>
+        </div>
+        <p style="white-space:pre-wrap;font-size:.9rem;line-height:1.7"><%= ticket.description %></p>
+        <% if (ticket.affected_asset) { %>
+        <div class="mt-2 text-sm text-muted">Device/asset: <strong style="color:var(--text)"><%= ticket.affected_asset %></strong></div>
+        <% } %>
+        <% if (ticket.client_env_tag) { %>
+        <div class="text-xs text-muted mt-1">Environment: <%= ticket.client_env_tag %></div>
+        <% } %>
+      </div>
+
+      <div class="card mb-3" style="padding:0">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border)"><div class="font-medium">Activity</div></div>
+        <div style="padding:4px 20px" id="ticket-timeline">
+          <% if (updates.length === 0) { %>
+          <div style="padding:24px 0;text-align:center;color:var(--muted);font-size:.85rem">No updates yet.</div>
+          <% } else { %>
+          <% updates.forEach(function(u) { %>
+          <div class="timeline-item" id="update-<%= u.id %>">
+            <div class="timeline-dot <%= u.author_type %>"></div>
+            <div class="timeline-content">
+              <div class="timeline-meta">
+                <%= u.author_type === 'admin' ? (u.admin_name || 'Admin') : ticket.primary_contact_name %>
+                · <%= new Date(u.created_at).toLocaleString() %>
+                <% if (u.internal) { %>
+                <span class="badge badge-on-hold" style="margin-left:6px;font-size:.65rem">internal</span>
+                <% } %>
+              </div>
+              <div class="<%= u.internal ? 'timeline-internal' : 'timeline-body' %>"><%= u.content %></div>
+            </div>
+          </div>
+          <% }) %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card mb-3">
+        <div class="card-title mb-3">Update Ticket</div>
+        <form hx-post="/admin/tickets/<%= ticket.id %>/status"
+              hx-target="#status-badge"
+              hx-swap="outerHTML"
+              hx-on:htmx:after-request="if(event.detail.successful){ this.querySelector('textarea[name=note]').value=''; var cs=this.querySelector('textarea[name=client_summary]'); if(cs) cs.value=''; }">
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <% statusOptions.forEach(function(s) { %>
+              <option value="<%= s %>" <%= ticket.status === s ? 'selected' : '' %>><%= statusLabel[s] %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Internal note <span class="text-muted text-xs">(not visible to client)</span></label>
+            <textarea name="note" rows="3" placeholder="Diagnosis, next steps, internal context..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Client update <span class="text-muted text-xs">(visible + triggers email)</span></label>
+            <textarea name="client_summary" rows="3" placeholder="What the client should know... Required when closing."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">
+            Save update <span class="htmx-indicator" style="font-size:.75rem">…</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title mb-2">Ticket Details</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="detail-item"><label>Client</label><p><a href="/admin/clients/<%= ticket.client_id %>"><%= ticket.company_name %></a></p></div>
+          <div class="detail-item"><label>Category</label><p><%= ticket.category %></p></div>
+          <div class="detail-item"><label>Assigned</label><p><%= ticket.assigned_name || 'Unassigned' %></p></div>
+          <% if (ticket.sla_due_at) { %>
+          <div class="detail-item"><label>SLA Due</label><p class="text-sm"><%= new Date(ticket.sla_due_at).toLocaleString() %></p></div>
+          <% } %>
+          <% if (ticket.root_cause_category) { %>
+          <div class="detail-item"><label>Root Cause</label><p><%= ticket.root_cause_category %></p></div>
+          <% } %>
+          <div class="detail-item"><label>Created</label><p class="text-sm"><%= new Date(ticket.created_at).toLocaleString() %></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>

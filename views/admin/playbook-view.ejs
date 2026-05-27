@@ -1,0 +1,25 @@
+<%- include('../partials/page-start', { title: 'Playbook: ' + name, user, isAdmin: true, activePath: '/admin/playbooks' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">Playbook: <span style="text-transform: capitalize;"><%= name %></span></div>
+  <div class="topbar-actions">
+    <a href="/admin/playbooks" class="btn btn-secondary btn-sm">← Back</a>
+  </div>
+</div>
+
+<div class="page">
+  <div class="card playbook-content">
+    <pre style="white-space: pre-wrap; font-family: 'Inter', sans-serif; line-height: 1.6; color: var(--text);"><%= content %></pre>
+  </div>
+</div>
+
+<style>
+  .playbook-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #111;
+    border: 1px solid #333;
+  }
+</style>
+
+<%- include('../partials/page-end') %>

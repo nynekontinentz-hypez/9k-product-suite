@@ -1,0 +1,124 @@
+<%- include('../partials/page-start', { title: 'Dashboard', user, isAdmin: true, activePath: '/admin' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">Admin Dashboard</div>
+  <div class="topbar-actions">
+    <a href="/admin/clients/new" class="btn btn-primary btn-sm">+ New Client</a>
+  </div>
+</div>
+<div class="page">
+
+  <div class="stats-grid">
+    <div class="stat-card <%= overview.tickets.critical_open > 0 ? 'danger' : '' %>">
+      <div class="stat-label">Critical Open</div>
+      <div class="stat-value"><%= overview.tickets.critical_open || 0 %></div>
+    </div>
+    <div class="stat-card <%= overview.tickets.open > 0 ? 'accent' : '' %>">
+      <div class="stat-label">Open Tickets</div>
+      <div class="stat-value"><%= overview.tickets.open || 0 %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">In Progress</div>
+      <div class="stat-value"><%= overview.tickets.in_progress || 0 %></div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-label">Active Clients</div>
+      <div class="stat-value"><%= overview.clients.active || 0 %></div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="align-items:start">
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Open Tickets</div>
+        <a href="/admin/tickets" class="text-sm text-accent">View all →</a>
+      </div>
+      <% if (tickets.length === 0) { %>
+      <div class="card"><div class="empty-state"><div class="empty-icon">◎</div><p>No open tickets.</p></div></div>
+      <% } else { %>
+      <div class="card" style="padding:0">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Client</th><th>Title</th><th>Urgency</th></tr></thead>
+            <tbody>
+              <% tickets.forEach(function(t) { %>
+              <tr>
+                <td class="text-muted">#<%= t.id %></td>
+                <td class="text-sm"><%= t.company_name %></td>
+                <td><a href="/admin/tickets/<%= t.id %>" class="table-link"><%= t.title %></a></td>
+                <td><span class="badge badge-<%= t.urgency %>"><%= t.urgency %></span></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Clients</div>
+        <a href="/admin/clients" class="text-sm text-accent">View all →</a>
+      </div>
+      <% if (clients.length === 0) { %>
+      <div class="card"><div class="empty-state"><div class="empty-icon">◉</div><p>No clients yet.</p></div></div>
+      <% } else { %>
+      <div class="card" style="padding:0">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Company</th><th>Plan</th><th>Health</th></tr></thead>
+            <tbody>
+              <% clients.slice(0,8).forEach(function(c) { %>
+              <tr>
+                <td><a href="/admin/clients/<%= c.id %>" class="table-link"><%= c.company_name %></a></td>
+                <td class="text-sm text-muted"><%= c.tier_name || '—' %></td>
+                <td>
+                  <% var health = c.account_health || 'good'; %>
+                  <% if (health === 'good') { %>
+                  <span class="badge badge-in-progress" style="background:#22c55e22;color:var(--green)"><%= health %></span>
+                  <% } else if (health === 'at-risk') { %>
+                  <span class="badge badge-high"><%= health %></span>
+                  <% } else { %>
+                  <span class="badge badge-open"><%= health %></span>
+                  <% } %>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+  </div>
+
+  <% if (overview.recentActivity && overview.recentActivity.length > 0) { %>
+  <div class="section">
+    <div class="section-title mb-2">Recent Activity</div>
+    <div class="card" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Title</th><th>Client</th><th>Status</th><th>Updated</th></tr></thead>
+          <tbody>
+            <% overview.recentActivity.forEach(function(t) { %>
+            <tr>
+              <td class="text-muted">#<%= t.id %></td>
+              <td><a href="/admin/tickets/<%= t.id %>" class="table-link"><%= t.title %></a></td>
+              <td class="text-sm text-muted"><%= t.company_name %></td>
+              <td><span class="badge badge-<%= t.status.replace('_','-') %>"><%= t.status.replace('_',' ') %></span></td>
+              <td class="text-muted text-sm"><%= new Date(t.updated_at).toLocaleString() %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+</div>
+
+<%- include('../partials/page-end') %>

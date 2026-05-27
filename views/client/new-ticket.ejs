@@ -1,0 +1,64 @@
+<%- include('../partials/page-start', { title: 'New Ticket', user, isAdmin: false, activePath: '/client/tickets/new' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">Submit Support Request</div>
+  <div class="topbar-actions">
+    <a href="/client/tickets" class="btn btn-secondary btn-sm">← Back to tickets</a>
+  </div>
+</div>
+<div class="page">
+  <div class="card" style="max-width:680px">
+    <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    <form method="POST" action="/client/tickets/new">
+
+      <div class="form-group">
+        <label for="title">Issue title <span style="color:var(--red)">*</span></label>
+        <input type="text" id="title" name="title" placeholder="Brief description of the issue" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group mb-0">
+          <label for="category">Category</label>
+          <select id="category" name="category">
+            <option value="general">General</option>
+            <option value="connectivity">Connectivity</option>
+            <option value="email">Email / Microsoft 365</option>
+            <option value="hardware">Hardware</option>
+            <option value="security">Security</option>
+            <option value="software">Software</option>
+            <option value="account">Account / Access</option>
+          </select>
+        </div>
+        <div class="form-group mb-0">
+          <label for="urgency">Urgency</label>
+          <select id="urgency" name="urgency">
+            <option value="low">Low — minor, not blocking</option>
+            <option value="normal" selected>Normal — impacting work</option>
+            <option value="high">High — significant disruption</option>
+            <option value="critical">Critical — system down</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group mt-2">
+        <label for="affected_asset">Affected device / asset <span class="text-muted">(optional)</span></label>
+        <input type="text" id="affected_asset" name="affected_asset" placeholder="e.g. DESKTOP-123, john@company.com">
+        <div class="form-hint">Helps us diagnose faster. Hostname, email, or description works.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description <span style="color:var(--red)">*</span></label>
+        <textarea id="description" name="description" rows="6" placeholder="What's happening? When did it start? What have you tried?" required></textarea>
+      </div>
+
+      <div class="flex gap-2 mt-2">
+        <button type="submit" class="btn btn-primary">Submit ticket</button>
+        <a href="/client" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>

@@ -1,0 +1,67 @@
+<% var editing = !!client; %>
+<%- include('../partials/page-start', { title: editing ? 'Edit Client' : 'New Client', user, isAdmin: true, activePath: '/admin/clients' }) %>
+
+<div class="topbar">
+  <div class="topbar-title"><%= editing ? 'Edit Client' : 'New Client' %></div>
+  <div class="topbar-actions">
+    <a href="/admin/clients" class="btn btn-secondary btn-sm">← Back</a>
+  </div>
+</div>
+<div class="page">
+  <div class="card" style="max-width:640px">
+    <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    <form method="POST" action="/admin/clients/<%= editing ? client.id + '/edit' : 'new' %>">
+
+      <div class="section-title mb-3">Company &amp; Contact</div>
+      <div class="form-group">
+        <label>Company name <span style="color:var(--red)">*</span></label>
+        <input type="text" name="company_name" required value="<%= client && client.company_name || '' %>">
+      </div>
+      <div class="form-row">
+        <div class="form-group mb-0">
+          <label>Primary contact name <span style="color:var(--red)">*</span></label>
+          <input type="text" name="primary_contact_name" required value="<%= client && client.primary_contact_name || '' %>">
+        </div>
+        <div class="form-group mb-0">
+          <label>Primary contact email <span style="color:var(--red)">*</span></label>
+          <input type="email" name="primary_contact_email" required value="<%= client && client.primary_contact_email || '' %>">
+          <% if (!editing) { %>
+          <div class="form-hint">A portal invite will be sent to this address.</div>
+          <% } %>
+        </div>
+      </div>
+      <div class="form-group mt-2">
+        <label>Phone</label>
+        <input type="text" name="phone" value="<%= client && client.phone || '' %>">
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-title mb-3">Plan &amp; Contract</div>
+
+      <div class="form-row">
+        <div class="form-group mb-0">
+          <label>Service tier</label>
+          <select name="service_tier_id">
+            <option value="">— No tier —</option>
+            <% serviceTiers.forEach(function(t) { %>
+            <option value="<%= t.id %>" <%= client && client.service_tier_id == t.id ? 'selected' : '' %>><%= t.name %> ($<%= t.monthly_price %>/mo)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group mb-0">
+          <label>Monthly rate <span class="text-muted">(if creating contract)</span></label>
+          <input type="number" name="monthly_rate" min="0" step="0.01" placeholder="e.g. 599">
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary"><%= editing ? 'Save changes' : 'Create client & send invite' %></button>
+        <a href="/admin/clients" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>

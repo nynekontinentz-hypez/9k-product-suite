@@ -1,0 +1,88 @@
+<%- include('../partials/page-start', { title: 'Ticket #' + ticket.id, user, isAdmin: false, activePath: '/client/tickets' }) %>
+
+<div class="topbar">
+  <div class="topbar-title">Ticket #<%= ticket.id %></div>
+  <div class="topbar-actions">
+    <a href="/client/tickets" class="btn btn-secondary btn-sm">← All tickets</a>
+  </div>
+</div>
+<div class="page">
+  <% if (created) { %>
+  <div class="alert alert-success">Your ticket has been submitted. We'll be in touch shortly.</div>
+  <% } %>
+
+  <div class="content-grid">
+    <div>
+      <div class="card mb-3">
+        <h2 style="font-size:1.1rem;margin-bottom:6px"><%= ticket.title %></h2>
+        <div class="text-muted text-sm mb-3">Submitted <%= new Date(ticket.created_at).toLocaleString() %></div>
+        <p style="white-space:pre-wrap;font-size:.9rem;line-height:1.7"><%= ticket.description %></p>
+        <% if (ticket.affected_asset) { %>
+        <div class="mt-2 text-sm text-muted">Device/asset: <strong style="color:var(--text)"><%= ticket.affected_asset %></strong></div>
+        <% } %>
+      </div>
+
+      <% if (ticket.client_visible_summary) { %>
+      <div class="card mb-3" style="border-color:var(--green)">
+        <div class="font-medium mb-1" style="color:var(--green)">Resolution summary</div>
+        <p class="text-sm" style="white-space:pre-wrap"><%= ticket.client_visible_summary %></p>
+      </div>
+      <% } %>
+
+      <div class="card" style="padding:0">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+          <div class="font-medium">Activity</div>
+        </div>
+        <% if (updates.length === 0) { %>
+        <div class="empty-state" style="padding:32px">
+          <p class="text-muted text-sm">No updates yet. We'll notify you when there's activity.</p>
+        </div>
+        <% } else { %>
+        <div style="padding:4px 20px">
+          <div class="timeline">
+            <% updates.forEach(function(u) { %>
+            <div class="timeline-item">
+              <div class="timeline-dot <%= u.author_type %>"></div>
+              <div class="timeline-content">
+                <div class="timeline-meta">
+                  <%= u.author_type === 'admin' ? (u.admin_name || '9K Systems') : user.name %>
+                  · <%= new Date(u.created_at).toLocaleString() %>
+                </div>
+                <div class="timeline-body"><%= u.content %></div>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div>
+      <div class="card mb-3">
+        <div class="card-title mb-3">Ticket details</div>
+        <div class="detail-grid">
+          <div class="detail-item"><label>Status</label><p><span class="badge badge-<%= ticket.status.replace('_','-') %>"><%= ticket.status.replace('_',' ') %></span></p></div>
+          <div class="detail-item"><label>Urgency</label><p><span class="badge badge-<%= ticket.urgency %>"><%= ticket.urgency %></span></p></div>
+          <div class="detail-item"><label>Category</label><p><%= ticket.category %></p></div>
+          <div class="detail-item"><label>Assigned</label><p><%= ticket.assigned_name || 'Unassigned' %></p></div>
+        </div>
+        <% if (ticket.sla_due_at) { %>
+        <div class="mt-3 text-sm">
+          <div class="text-muted text-xs" style="margin-bottom:2px">SLA target</div>
+          <div><%= new Date(ticket.sla_due_at).toLocaleString() %></div>
+        </div>
+        <% } %>
+      </div>
+
+      <div class="card">
+        <div class="text-sm text-muted">
+          Need to add more context to this ticket? Email us at
+          <a href="mailto:support@9ksystems.net">support@9ksystems.net</a> with ticket #<%= ticket.id %> in the subject.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>

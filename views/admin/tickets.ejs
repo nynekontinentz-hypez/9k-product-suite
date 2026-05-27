@@ -1,0 +1,45 @@
+<%- include('../partials/page-start', { title: 'Tickets', user, isAdmin: true, activePath: '/admin/tickets' }) %>
+
+<% var filters = ['all','open','in_progress','on_hold','closed']; %>
+
+<div class="topbar">
+  <div class="topbar-title">Tickets</div>
+  <div class="topbar-actions">
+    <div class="flex gap-2">
+      <% filters.forEach(function(f) { %>
+      <a href="/admin/tickets<%= f !== 'all' ? '?status='+f : '' %>" class="btn btn-sm <%= filter === f ? 'btn-primary' : 'btn-secondary' %>"><%= f.replace('_',' ') %></a>
+      <% }) %>
+    </div>
+  </div>
+</div>
+<div class="page">
+  <div class="card" style="padding:0">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Client</th><th>Title</th><th>Category</th><th>Urgency</th><th>Status</th><th>Assigned</th><th>Created</th>
+        </tr></thead>
+        <tbody>
+          <% if (tickets.length === 0) { %>
+          <tr><td colspan="8"><div class="empty-state">No tickets found.</div></td></tr>
+          <% } else { %>
+          <% tickets.forEach(function(t) { %>
+          <tr>
+            <td class="text-muted">#<%= t.id %></td>
+            <td class="text-sm"><a href="/admin/clients/<%= t.client_id %>" class="table-link"><%= t.company_name %></a></td>
+            <td><a href="/admin/tickets/<%= t.id %>" class="table-link"><%= t.title %></a></td>
+            <td class="text-sm text-muted"><%= t.category %></td>
+            <td><span class="badge badge-<%= t.urgency %>"><%= t.urgency %></span></td>
+            <td><span class="badge badge-<%= t.status.replace('_','-') %>"><%= t.status.replace('_',' ') %></span></td>
+            <td class="text-sm text-muted"><%= t.assigned_name || '—' %></td>
+            <td class="text-sm text-muted"><%= new Date(t.created_at).toLocaleDateString() %></td>
+          </tr>
+          <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>
