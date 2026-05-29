@@ -1,0 +1,249 @@
+<%
+  const overall = parseFloat(assessment.overall_score);
+  const identity = parseFloat(assessment.identity_score);
+  const continuity = parseFloat(assessment.continuity_score);
+  const resilience = parseFloat(assessment.resilience_score);
+  const level = getScoreLevel(overall);
+  const iLevel = getScoreLevel(identity);
+  const cLevel = getScoreLevel(continuity);
+  const rLevel = getScoreLevel(resilience);
+  const circ = 534.07;
+%>
+<%- include('../partials/page-start', { title: 'ORI Results', user, isAdmin: false, activePath: '/client/ori', extraCss: '/public/css/ori.css' }) %>
+
+<div class="ori-shell">
+
+<div class="topbar">
+  <div class="topbar-title" style="font-family:'Space Grotesk',sans-serif;letter-spacing:-0.02em">
+    Resilience Report
+  </div>
+  <div class="topbar-actions">
+    <a href="/client/ori" class="btn btn-secondary btn-sm">← ORI Hub</a>
+    <a href="/client/ori/assessment" class="btn btn-primary btn-sm">Re-assess</a>
+  </div>
+</div>
+
+<div class="page" style="max-width:900px">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="ori-label">Assessment Results</div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+      <!-- Score ring -->
+      <div class="ori-score-wrap" style="flex-shrink:0" aria-label="ORI score: <%= overall %> out of 10, <%= level.label %>">
+        <div class="ori-score-ring-wrap" style="width:160px;height:160px">
+          <svg class="ori-score-ring" viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="ori-score-ring-track" cx="100" cy="100" r="85"/>
+            <circle class="ori-score-ring-fill" cx="100" cy="100" r="85"
+              stroke="<%= level.color %>"
+              stroke-dasharray="<%= circ %>"
+              stroke-dashoffset="<%= circ %>"
+              id="oriRingFill"/>
+          </svg>
+          <div class="ori-score-center">
+            <span class="ori-score-number"><%= overall.toFixed(1) %></span>
+            <span class="ori-score-denom">/ 10</span>
+          </div>
+        </div>
+        <span class="ori-score-label <%= level.cssClass %>"><%= level.label %></span>
+      </div>
+
+      <!-- Interpretation -->
+      <div style="flex:1;min-width:240px;padding-top:8px">
+        <div class="ori-heading" style="font-size:1.5rem;margin-bottom:10px">
+          <%
+          let headline = '';
+          if (overall >= 8) headline = 'Your resilience posture is strong.';
+          else if (overall >= 6) headline = 'Solid foundation, some gaps remain.';
+          else if (overall >= 4) headline = 'Multiple critical exposures identified.';
+          else headline = 'Immediate action required.';
+          %>
+          <%= headline %>
+        </div>
+        <div class="ori-sub">
+          <%
+          let detail = '';
+          if (overall >= 8) detail = 'Core controls are in place and operating effectively. Continue with scheduled reviews to maintain this posture.';
+          else if (overall >= 6) detail = 'Core functions are protected but several gaps could allow a motivated threat actor to succeed. Scheduled remediation is recommended.';
+          else if (overall >= 4) detail = 'Multiple controls are missing or insufficient. The combination of gaps significantly elevates your breach probability. Prioritized remediation should begin immediately.';
+          else detail = 'Your environment is operating reactively. A single incident — ransomware, phishing, or hardware failure — could be catastrophic without these controls in place. Book a consultation today.';
+          %>
+          <%= detail %>
+        </div>
+        <div style="margin-top:16px;font-size:.78rem;color:var(--ori-muted)">
+          Assessed <%= new Date(assessment.created_at).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Pillar breakdown ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="ori-label">Pillar Breakdown</div>
+    <div class="ori-pillar-grid">
+
+      <div class="ori-pillar-card" style="border-color:rgba(34,211,238,.15)">
+        <div>
+          <div class="ori-pillar-icon">◉</div>
+          <div class="ori-pillar-label">Identity &amp; Access</div>
+        </div>
+        <div class="ori-pillar-score"><%= identity.toFixed(1) %></div>
+        <div class="ori-bar-track">
+          <div class="ori-bar-fill<%= identity < 4 ? ' crimson' : identity < 6 ? ' orange' : '' %>"
+            style="width:0%" data-target="<%= (identity / 10 * 100).toFixed(0) %>%"></div>
+        </div>
+        <span class="ori-score-label <%= iLevel.cssClass %>" style="align-self:flex-start"><%= iLevel.label %></span>
+      </div>
+
+      <div class="ori-pillar-card ori-card gold-accent" style="border-color:rgba(245,158,11,.15)">
+        <div>
+          <div class="ori-pillar-icon gold">◈</div>
+          <div class="ori-pillar-label">Data Integrity &amp; Continuity</div>
+        </div>
+        <div class="ori-pillar-score gold"><%= continuity.toFixed(1) %></div>
+        <div class="ori-bar-track">
+          <div class="ori-bar-fill gold<%= continuity < 4 ? ' crimson' : continuity < 6 ? ' orange' : '' %>"
+            style="width:0%" data-target="<%= (continuity / 10 * 100).toFixed(0) %>%"></div>
+        </div>
+        <span class="ori-score-label <%= cLevel.cssClass %>" style="align-self:flex-start"><%= cLevel.label %></span>
+      </div>
+
+      <div class="ori-pillar-card ori-card emerald-accent" style="border-color:rgba(16,185,129,.15)">
+        <div>
+          <div class="ori-pillar-icon em">◎</div>
+          <div class="ori-pillar-label">Operational Resilience</div>
+        </div>
+        <div class="ori-pillar-score em"><%= resilience.toFixed(1) %></div>
+        <div class="ori-bar-track">
+          <div class="ori-bar-fill em<%= resilience < 4 ? ' crimson' : resilience < 6 ? ' orange' : '' %>"
+            style="width:0%" data-target="<%= (resilience / 10 * 100).toFixed(0) %>%"></div>
+        </div>
+        <span class="ori-score-label <%= rLevel.cssClass %>" style="align-self:flex-start"><%= rLevel.label %></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Full remediation plan ──────────────────────────────────────────── -->
+  <% if (remediation.length > 0) { %>
+  <div class="section">
+    <div class="ori-label">Remediation Plan</div>
+    <div style="font-size:.85rem;color:var(--ori-muted);margin-bottom:20px">
+      <%= remediation.length %> item<%= remediation.length !== 1 ? 's' : '' %> identified — sorted by priority.
+      Critical items should be addressed within 30 days.
+    </div>
+
+    <div class="ori-remed-list">
+      <% remediation.forEach(function(item, i) { %>
+      <div class="ori-remed-item">
+        <div class="ori-remed-priority pri-<%= item.priority %>"><%= item.priority %></div>
+        <div class="ori-remed-content">
+          <div class="ori-remed-pillar"><%= item.pillarLabel %></div>
+          <div class="ori-remed-title"><%= item.question.replace(/\?$/,'') %></div>
+          <div class="ori-remed-rec"><%= item.recommendation %></div>
+        </div>
+        <div class="ori-remed-service"><%= item.service %></div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="section">
+    <div class="ori-card" style="text-align:center;padding:48px">
+      <div style="font-size:2.5rem;margin-bottom:12px">✓</div>
+      <div class="ori-heading" style="font-size:1.1rem;margin-bottom:8px">No critical gaps identified</div>
+      <div class="ori-sub">All assessed controls are in place. Schedule a quarterly re-assessment to maintain this posture.</div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- ── Answer summary ────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="ori-label">Responses</div>
+      <a href="/client/ori/assessment" style="font-size:.78rem;color:var(--ori-cyan)">Re-assess →</a>
+    </div>
+    <div class="ori-card" style="padding:0">
+      <table style="width:100%;border-collapse:collapse;font-size:.83rem">
+        <thead>
+          <tr>
+            <th style="padding:10px 16px;text-align:left;color:var(--ori-muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.06)">Control</th>
+            <th style="padding:10px 16px;text-align:left;color:var(--ori-muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.06)">Pillar</th>
+            <th style="padding:10px 16px;text-align:center;color:var(--ori-muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.06)">Response</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% checks.forEach(function(check) {
+            const ans = responses[check.key];
+          %>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:11px 16px;color:var(--ori-text)"><%= check.question %></td>
+            <td style="padding:11px 16px;color:var(--ori-muted);white-space:nowrap">
+              <% if (check.pillar === 'identity') { %><span style="color:var(--ori-cyan)">Identity</span>
+              <% } else if (check.pillar === 'continuity') { %><span style="color:var(--ori-gold)">Continuity</span>
+              <% } else { %><span style="color:var(--ori-emerald)">Resilience</span>
+              <% } %>
+            </td>
+            <td style="padding:11px 16px;text-align:center">
+              <% if (ans === 'yes') { %>
+                <span style="color:var(--ori-emerald);font-weight:700">✓ Yes</span>
+              <% } else if (ans === 'no') { %>
+                <span style="color:var(--ori-crimson);font-weight:700">✗ No</span>
+              <% } else { %>
+                <span style="color:var(--ori-muted)">—</span>
+              <% } %>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── CTA ────────────────────────────────────────────────────────────── -->
+  <% if (overall < 7) { %>
+  <div class="ori-card" style="border-color:rgba(34,211,238,.2);background:linear-gradient(135deg,var(--ori-surface),rgba(34,211,238,.04));padding:32px">
+    <div class="ori-label" style="margin-bottom:12px">Next Step</div>
+    <div class="ori-heading" style="font-size:1.2rem;margin-bottom:8px">
+      Ready to close these gaps?
+    </div>
+    <div class="ori-sub" style="margin-bottom:20px">
+      Book a free 30-minute consultation with Carlos Orso II. We'll review your results,
+      prioritize the highest-impact actions, and give you a concrete remediation roadmap —
+      no commitment required.
+    </div>
+    <a href="mailto:admin@9ksystems.net?subject=ORI%20Results%20Consultation%20%28Score%3A%20<%= overall.toFixed(1) %>%29"
+       class="ori-link-btn">
+      Book Your Free Consultation →
+    </a>
+  </div>
+  <% } %>
+
+</div><!-- /page -->
+</div><!-- /ori-shell -->
+
+<script>
+// Animate ring and bars on load
+window.addEventListener('load', function() {
+  var fill = document.getElementById('oriRingFill');
+  if (fill) {
+    var circ = 534.07;
+    var score = <%= overall %>;
+    setTimeout(function() {
+      fill.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)';
+      fill.style.strokeDashoffset = circ - (circ * score / 10);
+    }, 200);
+  }
+
+  // Animate bar fills
+  setTimeout(function() {
+    document.querySelectorAll('.ori-bar-fill[data-target]').forEach(function(bar) {
+      bar.style.transition = 'width 1.2s cubic-bezier(.4,0,.2,1)';
+      bar.style.width = bar.dataset.target;
+    });
+  }, 300);
+});
+</script>
+
+<%- include('../partials/page-end') %>

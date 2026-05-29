@@ -1,4 +1,4 @@
-<%- include('../partials/page-start', { title: 'Dashboard', user, isAdmin: false, activePath: '/client' }) %>
+<%- include('../partials/page-start', { title: 'Dashboard', user, isAdmin: false, activePath: '/client', extraCss: '/public/css/ori.css' }) %>
 
 <div class="topbar">
   <div class="topbar-title">Dashboard</div>
@@ -71,6 +71,48 @@
             <% }) %>
           </tbody>
         </table>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- ORI Score Card -->
+  <div class="section">
+    <% if (oriLatest) {
+      const oriScore = parseFloat(oriLatest.overall_score);
+      const oriLevel = oriGetLevel(oriScore);
+    %>
+    <div class="card" style="padding:20px 24px;border:1px solid rgba(34,211,238,0.15);background:linear-gradient(135deg,var(--surface),rgba(34,211,238,0.03))">
+      <div class="flex items-center justify-between" style="flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="text-align:center">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:<%= oriLevel.color %>;line-height:1">
+              <%= oriScore.toFixed(1) %>
+            </div>
+            <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">/ 10</div>
+          </div>
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;margin-bottom:2px">Operational Resilience Index</div>
+            <div class="text-muted text-sm">
+              <span style="color:<%= oriLevel.color %>;font-weight:600"><%= oriLevel.label %></span>
+              — Last assessed <%= new Date(oriLatest.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <a href="/client/ori/results/<%= oriLatest.id %>" class="btn btn-secondary btn-sm">View Report</a>
+          <a href="/client/ori" class="btn btn-primary btn-sm" style="background:rgba(34,211,238,0.15);color:#22d3ee;border:1px solid rgba(34,211,238,.3)">ORI Hub →</a>
+        </div>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="card" style="padding:20px 24px;border:1px solid rgba(34,211,238,0.1)">
+      <div class="flex items-center justify-between" style="flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;margin-bottom:4px">Operational Resilience Index</div>
+          <div class="text-muted text-sm">Run your first assessment to see your security posture score.</div>
+        </div>
+        <a href="/client/ori/assessment" class="btn btn-primary btn-sm">Run Assessment →</a>
       </div>
     </div>
     <% } %>
