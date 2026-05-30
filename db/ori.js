@@ -12,7 +12,7 @@ async function saveAssessment(clientId, responses, scores) {
 
 async function getLatestAssessment(clientId) {
   return queryOne(
-    `SELECT * FROM ori_assessments WHERE client_id = ? ORDER BY created_at DESC LIMIT 1`,
+    `SELECT * FROM ori_assessments WHERE client_id = ? ORDER BY created_at DESC, id DESC LIMIT 1`,
     [clientId]
   );
 }
@@ -20,7 +20,7 @@ async function getLatestAssessment(clientId) {
 async function getAssessmentHistory(clientId, limit = 6) {
   return query(
     `SELECT id, overall_score, identity_score, continuity_score, resilience_score, created_at
-     FROM ori_assessments WHERE client_id = ? ORDER BY created_at DESC LIMIT ?`,
+     FROM ori_assessments WHERE client_id = ? ORDER BY created_at DESC, id DESC LIMIT ?`,
     [clientId, limit]
   );
 }
