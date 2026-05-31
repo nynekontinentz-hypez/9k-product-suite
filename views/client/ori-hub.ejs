@@ -1,0 +1,237 @@
+<%- include('../partials/page-start', { title: 'Resilience Index', user, isAdmin: false, activePath: '/client/ori', extraCss: '/public/css/ori.css' }) %>
+
+<div class="ori-shell">
+
+<div class="topbar">
+  <div class="topbar-title" style="font-family:'Space Grotesk',sans-serif;letter-spacing:-0.02em">
+    Operational Resilience Index
+  </div>
+  <div class="topbar-actions">
+    <a href="/client/ori/assessment" class="btn btn-primary btn-sm">Run New Assessment</a>
+  </div>
+</div>
+
+<div class="page" style="max-width:1040px">
+
+<% if (!latest) { %>
+  <!-- ── Empty state ─────────────────────────────────────────────────────── -->
+  <div class="ori-card ori-empty">
+    <div class="ori-empty-icon" aria-hidden="true">◎</div>
+    <h3>No assessment on record</h3>
+    <p>
+      Run your first Operational Resilience Index diagnostic to get a comprehensive
+      picture of your security posture across three key pillars.
+    </p>
+    <a href="/client/ori/assessment" class="ori-link-btn">Start Your First Assessment →</a>
+  </div>
+
+<% } else {
+  const overall = parseFloat(latest.overall_score);
+  const identity = parseFloat(latest.identity_score);
+  const continuity = parseFloat(latest.continuity_score);
+  const resilience = parseFloat(latest.resilience_score);
+  const level = getScoreLevel(overall);
+  const circ = 534.07; // 2π × 85
+  const offset = circ - (circ * overall / 10);
+  const iLevel = getScoreLevel(identity);
+  const cLevel = getScoreLevel(continuity);
+  const rLevel = getScoreLevel(resilience);
+%>
+
+  <!-- ── Hero: score + meta ─────────────────────────────────────────────── -->
+  <div class="ori-hub-hero">
+    <!-- Score ring -->
+    <div class="ori-score-wrap" aria-label="Overall ORI score: <%= overall %> out of 10, <%= level.label %>">
+      <div class="ori-score-ring-wrap">
+        <svg class="ori-score-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="ori-score-ring-track" cx="100" cy="100" r="85"/>
+          <circle class="ori-score-ring-fill" cx="100" cy="100" r="85"
+            stroke="<%= level.color %>"
+            stroke-dasharray="<%= circ %>"
+            stroke-dashoffset="<%= circ %>"
+            id="oriRingFill"/>
+        </svg>
+        <div class="ori-score-center">
+          <span class="ori-score-number"><%= overall.toFixed(1) %></span>
+          <span class="ori-score-denom">/ 10</span>
+        </div>
+      </div>
+      <span class="ori-score-label <%= level.cssClass %>"><%= level.label %></span>
+    </div>
+
+    <!-- Meta -->
+    <div class="ori-hub-meta">
+      <h2><%= client.company_name || 'Your Business' %></h2>
+      <p>
+        Last assessed <%= new Date(latest.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %>.
+        <%
+          let interpretation = '';
+          if (overall >= 8) interpretation = 'Your security posture is proactive. Core controls are in place and operating effectively.';
+          else if (overall >= 6) interpretation = 'Core functions are protected but some gaps remain. Scheduled improvements recommended.';
+          else if (overall >= 4) interpretation = 'Multiple critical controls are missing. Prioritized remediation is strongly advised.';
+          else interpretation = 'Your environment is operating reactively. A breach-level incident is a matter of when, not if.';
+        %>
+        <%= interpretation %>
+      </p>
+      <div class="ori-hub-actions">
+        <a href="/client/ori/results/<%= latest.id %>" class="ori-link-btn">View Full Report →</a>
+        <a href="/client/ori/assessment" class="ori-link-btn secondary">Run New Assessment</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Pillar scores ───────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="ori-label">Pillar Breakdown</div>
+    <div class="ori-pillar-grid">
+
+      <!-- Identity & Access -->
+      <div class="ori-pillar-card">
+        <div>
+          <div class="ori-pillar-icon">◉</div>
+          <div class="ori-pillar-label">Identity &amp; Access</div>
+        </div>
+        <div class="ori-pillar-score"><%= identity.toFixed(1) %></div>
+        <div class="ori-bar-track">
+          <div class="ori-bar-fill<%= identity < 4 ? ' crimson' : identity < 6 ? ' orange' : '' %>"
+            style="width:<%= (identity / 10 * 100).toFixed(0) %>%"></div>
+        </div>
+        <div class="text-xs" style="color:var(--ori-muted)"><%= iLevel.label %></div>
+      </div>
+
+      <!-- Data Integrity -->
+      <div class="ori-pillar-card">
+        <div>
+          <div class="ori-pillar-icon gold">◈</div>
+          <div class="ori-pillar-label">Data Integrity &amp; Continuity</div>
+        </div>
+        <div class="ori-pillar-score gold"><%= continuity.toFixed(1) %></div>
+        <div class="ori-bar-track">
+          <div class="ori-bar-fill gold<%= continuity < 4 ? ' crimson' : continuity < 6 ? ' orange' : '' %>"
+            style="width:<%= (continuity / 10 * 100).toFixed(0) %>%"></div>
+        </div>
+        <div class="text-xs" style="color:var(--ori-muted)"><%= cLevel.label %></div>
+      </div>
+
+      <!-- Operational Resilience -->
+      <div class="ori-pillar-card">
+        <div>
+          <div class="ori-pillar-icon em">◎</div>
+          <div class="ori-pillar-label">Operational Resilience</div>
+        </div>
+        <div class="ori-pillar-score em"><%= resilience.toFixed(1) %></div>
+        <div class="ori-bar-track">
+          <div class="ori-bar-fill em<%= resilience < 4 ? ' crimson' : resilience < 6 ? ' orange' : '' %>"
+            style="width:<%= (resilience / 10 * 100).toFixed(0) %>%"></div>
+        </div>
+        <div class="text-xs" style="color:var(--ori-muted)"><%= rLevel.label %></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Top remediation items ──────────────────────────────────────────── -->
+  <% if (remediation.length > 0) { %>
+  <div class="section">
+    <div class="section-header">
+      <div class="ori-label">Priority Actions</div>
+      <a href="/client/ori/results/<%= latest.id %>" class="text-sm" style="color:var(--ori-cyan)">Full report →</a>
+    </div>
+    <div class="ori-remed-list">
+      <% remediation.slice(0, 3).forEach(function(item) { %>
+      <div class="ori-remed-item">
+        <div class="ori-remed-priority pri-<%= item.priority %>"><%= item.priority %></div>
+        <div class="ori-remed-content">
+          <div class="ori-remed-pillar"><%= item.pillarLabel %></div>
+          <div class="ori-remed-title"><%= item.question.replace(/\?$/, '') %></div>
+          <div class="ori-remed-rec"><%= item.recommendation %></div>
+        </div>
+        <div class="ori-remed-service"><%= item.service %></div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- ── Assessment history ─────────────────────────────────────────────── -->
+  <% if (history.length > 1) { %>
+  <div class="section">
+    <div class="ori-label">Assessment History</div>
+    <div class="ori-card" style="padding:0">
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+        <thead>
+          <tr>
+            <th style="padding:10px 16px;text-align:left;color:var(--ori-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.06)">Date</th>
+            <th style="padding:10px 16px;text-align:left;color:var(--ori-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.06)">ORI</th>
+            <th style="padding:10px 16px;text-align:left;color:var(--ori-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.06)">Identity</th>
+            <th style="padding:10px 16px;text-align:left;color:var(--ori-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.06)">Continuity</th>
+            <th style="padding:10px 16px;text-align:left;color:var(--ori-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.06)">Resilience</th>
+            <th style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.06)"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% history.forEach(function(h, i) {
+            const hl = getScoreLevel(parseFloat(h.overall_score));
+          %>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:12px 16px;color:var(--ori-muted);font-size:.8rem">
+              <%= new Date(h.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+              <% if (i === 0) { %><span style="margin-left:6px;font-size:.65rem;background:var(--ori-cyan-dim);color:var(--ori-cyan);padding:2px 8px;border-radius:20px;border:1px solid rgba(34,211,238,.2)">Latest</span><% } %>
+            </td>
+            <td style="padding:12px 16px">
+              <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:<%= hl.color %>">
+                <%= parseFloat(h.overall_score).toFixed(1) %>
+              </span>
+            </td>
+            <td style="padding:12px 16px;color:var(--ori-muted)"><%= parseFloat(h.identity_score).toFixed(1) %></td>
+            <td style="padding:12px 16px;color:var(--ori-muted)"><%= parseFloat(h.continuity_score).toFixed(1) %></td>
+            <td style="padding:12px 16px;color:var(--ori-muted)"><%= parseFloat(h.resilience_score).toFixed(1) %></td>
+            <td style="padding:12px 16px;text-align:right">
+              <a href="/client/ori/results/<%= h.id %>" style="font-size:.78rem;color:var(--ori-cyan)">View →</a>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } %>
+
+<% } %>
+
+  <!-- ── Book consultation prompt ───────────────────────────────────────── -->
+  <div class="ori-card" style="padding:20px 24px;margin-top:8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;color:var(--ori-text);margin-bottom:4px">
+          Want help improving your score?
+        </div>
+        <div style="font-size:.85rem;color:var(--ori-muted)">
+          Book a free 30-minute consultation — no commitment required.
+        </div>
+      </div>
+      <a href="mailto:admin@9ksystems.net?subject=ORI%20Consultation%20Request" class="ori-link-btn">
+        Book Free Consultation →
+      </a>
+    </div>
+  </div>
+
+</div><!-- /page -->
+</div><!-- /ori-shell -->
+
+<script>
+  // Animate the score ring on load
+  window.addEventListener('load', function() {
+    const fill = document.getElementById('oriRingFill');
+    if (!fill) return;
+    const circ = 534.07;
+    const score = <%= latest ? latest.overall_score : 0 %>;
+    const target = circ - (circ * score / 10);
+    setTimeout(function() {
+      fill.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)';
+      fill.style.strokeDashoffset = target;
+    }, 200);
+  });
+</script>
+
+<%- include('../partials/page-end') %>

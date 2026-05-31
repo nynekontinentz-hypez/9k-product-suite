@@ -6,21 +6,24 @@ const tickets = require('../db/tickets');
 const contracts = require('../db/contracts');
 const mailer = require('../lib/mailer');
 const audit = require('../middleware/audit');
+const oriDb = require('../db/ori');
+const { calculateORI, getScoreLevel, generateRemediation, prefillFromClient, CHECKS, PILLARS } = require('../lib/ori-engine');
 
 router.use(requireClient);
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
 
 router.get('/', async (req, res) => {
-  const [client, clientTickets, contract] = await Promise.all([
+  const [client, clientTickets, contract, oriLatest] = await Promise.all([
     clients.findById(req.session.client.id),
     tickets.findByClient(req.session.client.id),
     contracts.findActive(req.session.client.id),
+    oriDb.getLatestAssessment(req.session.client.id),
   ]);
   const open = clientTickets.filter(t => t.status === 'open' || t.status === 'in_progress');
   res.render('client/dashboard', {
     user: req.session.client, client, tickets: clientTickets.slice(0, 5),
-    openCount: open.length, contract,
+    openCount: open.length, contract, oriLatest, oriGetLevel: getScoreLevel,
   });
 });
 
@@ -62,6 +65,60 @@ router.get('/tickets/:id', async (req, res) => {
   res.render('client/ticket-detail', {
     user: req.session.client, ticket, updates,
     created: req.query.created === '1',
+  });
+});
+
+// ── ORI: Operational Resilience Index ────────────────────────────────────────
+
+router.get('/ori', async (req, res) => {
+  const [client, latest, history] = await Promise.all([
+    clients.findById(req.session.client.id),
+    oriDb.getLatestAssessment(req.session.client.id),
+    oriDb.getAssessmentHistory(req.session.client.id),
+  ]);
+  let remediation = [];
+  if (latest) {
+    const resp = JSON.parse(latest.responses);
+    remediation = generateRemediation(resp).slice(0, 3);
+  }
+  res.render('client/ori-hub', {
+    user: req.session.client, client, latest, history, remediation, getScoreLevel,
+  });
+});
+
+router.get('/ori/assessment', async (req, res) => {
+  const client = await clients.findById(req.session.client.id);
+  const prefilled = prefillFromClient(client);
+  res.render('client/ori-assessment', {
+    user: req.session.client,
+    prefilled: JSON.stringify(prefilled),
+    checks: CHECKS,
+    pillars: PILLARS,
+  });
+});
+
+router.post('/ori/assessment', async (req, res) => {
+  const responses = {};
+  for (const check of CHECKS) {
+    const val = req.body[check.key];
+    if (val === 'yes' || val === 'no') responses[check.key] = val;
+  }
+  const scores = calculateORI(responses);
+  const id = await oriDb.saveAssessment(req.session.client.id, responses, scores);
+  await audit.log('client', req.session.client.id, 'ori_assessment', 'ori_assessment', id, { score: scores.overall }, req.ip);
+  res.redirect(`/client/ori/results/${id}`);
+});
+
+router.get('/ori/results/:id', async (req, res) => {
+  const assessment = await oriDb.getAssessmentById(req.params.id, req.session.client.id);
+  if (!assessment) {
+    return res.status(404).render('error', { message: 'Assessment not found.', status: 404, user: req.session.client });
+  }
+  const responses = JSON.parse(assessment.responses);
+  const remediation = generateRemediation(responses);
+  res.render('client/ori-results', {
+    user: req.session.client, assessment, responses, remediation,
+    checks: CHECKS, pillars: PILLARS, getScoreLevel,
   });
 });
 

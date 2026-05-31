@@ -1,0 +1,266 @@
+<%- include('../partials/page-start', { title: 'Resilience Assessment', user, isAdmin: false, activePath: '/client/ori', extraCss: '/public/css/ori.css' }) %>
+
+<div class="ori-shell">
+
+<div class="topbar">
+  <div class="topbar-title" style="font-family:'Space Grotesk',sans-serif;letter-spacing:-0.02em">
+    Resilience Diagnostic
+  </div>
+  <div class="topbar-actions">
+    <a href="/client/ori" class="btn btn-secondary btn-sm">← Back</a>
+  </div>
+</div>
+
+<div class="page" style="max-width:760px">
+
+  <!-- Progress bar -->
+  <div class="ori-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Assessment progress" id="oriProgress">
+    <div class="ori-progress-fill" id="oriProgressFill" style="width:0%"></div>
+  </div>
+
+  <form method="POST" action="/client/ori/assessment" id="oriForm">
+
+    <!-- ── Step 0: Intro ────────────────────────────────────────────────── -->
+    <div class="ori-step active" id="step-0">
+      <div class="ori-wizard-wrap">
+        <div class="ori-step-header">
+          <div class="ori-step-count">Overview</div>
+          <div class="ori-step-title">Operational Resilience Index</div>
+          <div class="ori-step-desc">
+            18 questions across three pillars. Each answer contributes to your ORI score on a 0–10 scale,
+            where higher is healthier. This takes under 5 minutes and produces a prioritized remediation plan.
+          </div>
+        </div>
+
+        <div class="ori-intro-pillars">
+          <div class="ori-intro-pillar">
+            <div class="ori-intro-pillar-icon" style="color:var(--ori-cyan)">◉</div>
+            <div class="ori-intro-pillar-name">Identity &amp; Access</div>
+            <div class="ori-intro-pillar-count">6 questions</div>
+          </div>
+          <div class="ori-intro-pillar">
+            <div class="ori-intro-pillar-icon" style="color:var(--ori-gold)">◈</div>
+            <div class="ori-intro-pillar-name">Data Integrity</div>
+            <div class="ori-intro-pillar-count">6 questions</div>
+          </div>
+          <div class="ori-intro-pillar">
+            <div class="ori-intro-pillar-icon" style="color:var(--ori-emerald)">◎</div>
+            <div class="ori-intro-pillar-name">Operational Resilience</div>
+            <div class="ori-intro-pillar-count">6 questions</div>
+          </div>
+        </div>
+
+        <div style="background:var(--ori-surface);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px 20px;font-size:.85rem;color:var(--ori-muted);line-height:1.6">
+          Answer each question based on your current state — not what you plan to do.
+          Pre-filled answers come from your environment profile and can be overridden.
+          Unanswered questions have no effect on your score.
+        </div>
+
+        <div class="ori-wizard-nav" style="border-top:none;padding-top:28px">
+          <div></div>
+          <button type="button" class="ori-btn-next" onclick="goToStep(1)">
+            Begin Assessment →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Step 1: Identity & Access ───────────────────────────────────── -->
+    <div class="ori-step" id="step-1">
+      <div class="ori-wizard-wrap">
+        <div class="ori-step-header">
+          <div class="ori-step-count">Step 1 of 3</div>
+          <div class="ori-step-title" style="color:var(--ori-cyan)">Identity &amp; Access</div>
+          <div class="ori-step-desc">
+            Controls governing who can access what — credentials, privileges, and access lifecycle management.
+          </div>
+        </div>
+
+        <div class="ori-q-list" id="pillar-identity">
+          <% let qNum = 0; %>
+          <% checks.filter(c => c.pillar === 'identity').forEach(function(check, i) { qNum++; %>
+          <div class="ori-q-card" id="qcard-<%= check.key %>">
+            <div class="ori-q-num"><%= String(qNum).padStart(2,'0') %></div>
+            <div class="ori-q-text"><%= check.question %></div>
+            <div class="ori-q-hint"><%= check.hint %></div>
+            <div class="ori-q-options">
+              <button type="button" class="ori-q-btn" data-key="<%= check.key %>" data-val="yes"
+                onclick="selectAnswer('<%= check.key %>','yes')">
+                <input type="radio" name="<%= check.key %>" value="yes" id="<%= check.key %>_yes">
+                ✓ Yes
+              </button>
+              <button type="button" class="ori-q-btn" data-key="<%= check.key %>" data-val="no"
+                onclick="selectAnswer('<%= check.key %>','no')">
+                <input type="radio" name="<%= check.key %>" value="no" id="<%= check.key %>_no">
+                ✗ No
+              </button>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+
+        <div class="ori-wizard-nav">
+          <button type="button" class="ori-btn-prev" onclick="goToStep(0)">← Back</button>
+          <button type="button" class="ori-btn-next" onclick="goToStep(2)">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Step 2: Data Integrity & Continuity ─────────────────────────── -->
+    <div class="ori-step" id="step-2">
+      <div class="ori-wizard-wrap">
+        <div class="ori-step-header">
+          <div class="ori-step-count">Step 2 of 3</div>
+          <div class="ori-step-title" style="color:var(--ori-gold)">Data Integrity &amp; Continuity</div>
+          <div class="ori-step-desc">
+            Protection and recoverability of your critical business data — backups, testing, and disaster recovery.
+          </div>
+        </div>
+
+        <div class="ori-q-list" id="pillar-continuity">
+          <% checks.filter(c => c.pillar === 'continuity').forEach(function(check, i) { qNum++; %>
+          <div class="ori-q-card" id="qcard-<%= check.key %>">
+            <div class="ori-q-num gold"><%= String(qNum).padStart(2,'0') %></div>
+            <div class="ori-q-text"><%= check.question %></div>
+            <div class="ori-q-hint"><%= check.hint %></div>
+            <div class="ori-q-options">
+              <button type="button" class="ori-q-btn" data-key="<%= check.key %>" data-val="yes"
+                onclick="selectAnswer('<%= check.key %>','yes')">
+                <input type="radio" name="<%= check.key %>" value="yes" id="<%= check.key %>_yes">
+                ✓ Yes
+              </button>
+              <button type="button" class="ori-q-btn" data-key="<%= check.key %>" data-val="no"
+                onclick="selectAnswer('<%= check.key %>','no')">
+                <input type="radio" name="<%= check.key %>" value="no" id="<%= check.key %>_no">
+                ✗ No
+              </button>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+
+        <div class="ori-wizard-nav">
+          <button type="button" class="ori-btn-prev" onclick="goToStep(1)">← Back</button>
+          <button type="button" class="ori-btn-next" onclick="goToStep(3)">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Step 3: Operational Resilience ──────────────────────────────── -->
+    <div class="ori-step" id="step-3">
+      <div class="ori-wizard-wrap">
+        <div class="ori-step-header">
+          <div class="ori-step-count">Step 3 of 3</div>
+          <div class="ori-step-title" style="color:var(--ori-emerald)">Operational Resilience</div>
+          <div class="ori-step-desc">
+            Your systems' ability to resist, detect, and recover from threats — endpoint protection, patching, and training.
+          </div>
+        </div>
+
+        <div class="ori-q-list" id="pillar-resilience">
+          <% checks.filter(c => c.pillar === 'resilience').forEach(function(check, i) { qNum++; %>
+          <div class="ori-q-card" id="qcard-<%= check.key %>">
+            <div class="ori-q-num em"><%= String(qNum).padStart(2,'0') %></div>
+            <div class="ori-q-text"><%= check.question %></div>
+            <div class="ori-q-hint"><%= check.hint %></div>
+            <div class="ori-q-options">
+              <button type="button" class="ori-q-btn" data-key="<%= check.key %>" data-val="yes"
+                onclick="selectAnswer('<%= check.key %>','yes')">
+                <input type="radio" name="<%= check.key %>" value="yes" id="<%= check.key %>_yes">
+                ✓ Yes
+              </button>
+              <button type="button" class="ori-q-btn" data-key="<%= check.key %>" data-val="no"
+                onclick="selectAnswer('<%= check.key %>','no')">
+                <input type="radio" name="<%= check.key %>" value="no" id="<%= check.key %>_no">
+                ✗ No
+              </button>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+
+        <div class="ori-wizard-nav">
+          <button type="button" class="ori-btn-prev" onclick="goToStep(2)">← Back</button>
+          <button type="submit" class="ori-btn-next ori-btn-submit" id="submitBtn">
+            Calculate My Score →
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </form><!-- /oriForm -->
+
+</div><!-- /page -->
+</div><!-- /ori-shell -->
+
+<script>
+const TOTAL_STEPS = 4; // 0-3
+let currentStep = 0;
+
+const prefilled = <%- prefilled %>;
+
+function goToStep(n) {
+  document.querySelectorAll('.ori-step').forEach(function(el, i) {
+    if (i === n) {
+      el.classList.add('active');
+    } else {
+      el.classList.remove('active');
+    }
+  });
+  currentStep = n;
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress() {
+  const pct = currentStep === 0 ? 0 : Math.round((currentStep / (TOTAL_STEPS - 1)) * 100);
+  const fill = document.getElementById('oriProgressFill');
+  const bar = document.getElementById('oriProgress');
+  if (fill) fill.style.width = pct + '%';
+  if (bar) bar.setAttribute('aria-valuenow', pct);
+}
+
+function selectAnswer(key, val) {
+  // Update the hidden radio input
+  const radio = document.getElementById(key + '_' + val);
+  if (radio) radio.checked = true;
+
+  // Update button styles in this card
+  const card = document.getElementById('qcard-' + key);
+  if (!card) return;
+  card.classList.add('answered');
+
+  card.querySelectorAll('.ori-q-btn').forEach(function(btn) {
+    btn.classList.remove('selected-yes', 'selected-no');
+    if (btn.dataset.val === val) {
+      btn.classList.add(val === 'yes' ? 'selected-yes' : 'selected-no');
+    }
+  });
+}
+
+// Pre-fill from onboarding data
+function applyPrefilled() {
+  Object.entries(prefilled).forEach(function([key, val]) {
+    if (val === 'yes' || val === 'no') {
+      selectAnswer(key, val);
+    }
+  });
+}
+
+// Intercept submit to show loading state
+document.getElementById('oriForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  if (btn) {
+    btn.textContent = 'Calculating…';
+    btn.disabled = true;
+  }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  updateProgress();
+  applyPrefilled();
+});
+</script>
+
+<%- include('../partials/page-end') %>

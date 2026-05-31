@@ -188,6 +188,63 @@ describe('Route integration', () => {
       const res = await request('GET', '/client/onboarding', { cookie });
       assert.equal(res.status, 200);
     });
+
+    // ── ORI routes ─────────────────────────────────────────────────────────
+
+    it('GET /client/ori without session redirects to /login', async () => {
+      const res = await request('GET', '/client/ori');
+      assert.equal(res.status, 302);
+      assert.ok(res.headers.location.includes('/login'));
+    });
+
+    it('GET /client/ori with session returns 200', async () => {
+      const res = await request('GET', '/client/ori', { cookie });
+      assert.equal(res.status, 200);
+      assert.ok(res.body.includes('Resilience') || res.body.includes('ORI') || res.body.includes('Assessment'));
+    });
+
+    it('GET /client/ori/assessment returns 200 with assessment form', async () => {
+      const res = await request('GET', '/client/ori/assessment', { cookie });
+      assert.equal(res.status, 200);
+      assert.ok(res.body.includes('mfa_enforced') || res.body.includes('assessment') || res.body.includes('Identity'));
+    });
+
+    it('POST /client/ori/assessment with full responses redirects to results', async () => {
+      const body = {
+        mfa_enforced: 'yes', no_shared_creds: 'yes', password_manager: 'no',
+        least_privilege: 'yes', access_review: 'no', offboarding: 'yes',
+        backup_exists: 'yes', backup_tested: 'yes', offsite_backup: 'no',
+        data_classified: 'yes', dr_plan: 'no', recovery_time: 'yes',
+        antivirus_edr: 'yes', firewall: 'yes', patch_management: 'no',
+        security_training: 'yes', incident_response: 'no', vpn_remote: 'yes',
+      };
+      const res = await request('POST', '/client/ori/assessment', { body, cookie });
+      assert.equal(res.status, 302);
+      assert.ok(res.headers.location.includes('/client/ori/results/'));
+    });
+
+    it('GET /client/ori/results/:id returns 200 with score', async () => {
+      // Submit an assessment first to get a valid id
+      const body = {
+        mfa_enforced: 'yes', no_shared_creds: 'no', password_manager: 'no',
+        least_privilege: 'no', access_review: 'no', offboarding: 'no',
+        backup_exists: 'yes', backup_tested: 'no', offsite_backup: 'no',
+        data_classified: 'no', dr_plan: 'no', recovery_time: 'no',
+        antivirus_edr: 'no', firewall: 'no', patch_management: 'no',
+        security_training: 'no', incident_response: 'no', vpn_remote: 'no',
+      };
+      const post = await request('POST', '/client/ori/assessment', { body, cookie });
+      assert.equal(post.status, 302);
+      const location = post.headers.location;
+      const res = await request('GET', location, { cookie });
+      assert.equal(res.status, 200);
+      assert.ok(res.body.includes('Resilience') || res.body.includes('score') || res.body.includes('pillar'));
+    });
+
+    it('GET /client/ori/results/999999 returns 404', async () => {
+      const res = await request('GET', '/client/ori/results/999999', { cookie });
+      assert.equal(res.status, 404);
+    });
   });
 
   // ── Admin auth flow ───────────────────────────────────────────────────────

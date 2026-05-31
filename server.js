@@ -55,11 +55,11 @@ app.use('/client', require('./routes/client'));
 app.use('/admin', require('./routes/admin'));
 app.use('/admin/playbooks', require('./routes/playbooks'));
 
-// ── Root redirect ─────────────────────────────────────────────────────────────
+// ── Root: landing page for guests, redirect for authenticated users ────────────
 app.get('/', (req, res) => {
   if (req.session?.admin) return res.redirect('/admin');
   if (req.session?.client) return res.redirect('/client');
-  res.redirect('/login');
+  res.render('landing');
 });
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
