@@ -68,20 +68,20 @@
       <div class="card" style="padding:0">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Company</th><th>Plan</th><th>Health</th></tr></thead>
+            <thead><tr><th>Company</th><th>Plan</th><th>ORI</th></tr></thead>
             <tbody>
               <% clients.slice(0,8).forEach(function(c) { %>
               <tr>
                 <td><a href="/admin/clients/<%= c.id %>" class="table-link"><%= c.company_name %></a></td>
                 <td class="text-sm text-muted"><%= c.tier_name || '—' %></td>
                 <td>
-                  <% var health = c.account_health || 'good'; %>
-                  <% if (health === 'good') { %>
-                  <span class="badge badge-in-progress" style="background:#22c55e22;color:var(--green)"><%= health %></span>
-                  <% } else if (health === 'at-risk') { %>
-                  <span class="badge badge-high"><%= health %></span>
+                  <% if (c.oriLatest) {
+                    const s = parseFloat(c.oriLatest.overall_score);
+                    const lvl = getScoreLevel(s);
+                  %>
+                  <span style="font-weight:600;color:<%= lvl.color %>"><%= s.toFixed(1) %></span>
                   <% } else { %>
-                  <span class="badge badge-open"><%= health %></span>
+                  <span class="text-muted text-xs">—</span>
                   <% } %>
                 </td>
               </tr>

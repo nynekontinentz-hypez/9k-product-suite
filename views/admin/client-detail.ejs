@@ -69,6 +69,36 @@
     </div>
 
     <div>
+      <!-- ORI Score Card -->
+      <% if (oriLatest) {
+        const oriScore = parseFloat(oriLatest.overall_score);
+        const oriLvl = getScoreLevel(oriScore);
+      %>
+      <div class="card mb-3" style="border-color:rgba(34,211,238,.15)">
+        <div class="card-title mb-2" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Operational Resilience Index</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+          <div style="font-family:var(--font-head);font-size:2rem;font-weight:700;color:<%= oriLvl.color %>;line-height:1"><%= oriScore.toFixed(1) %></div>
+          <div>
+            <div style="font-weight:600;color:<%= oriLvl.color %>"><%= oriLvl.label %></div>
+            <div class="text-xs text-muted">Last assessed <%= new Date(oriLatest.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) %></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:.75rem;text-align:center">
+          <% [['Identity',parseFloat(oriLatest.identity_score),'var(--accent)'],['Continuity',parseFloat(oriLatest.continuity_score),'var(--amber)'],['Resilience',parseFloat(oriLatest.resilience_score),'var(--green)']].forEach(function(p){ %>
+          <div style="background:var(--surface2);border-radius:6px;padding:6px 4px">
+            <div style="font-weight:700;color:<%= p[2] %>"><%= p[1].toFixed(1) %></div>
+            <div style="color:var(--muted)"><%= p[0] %></div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } else { %>
+      <div class="card mb-3" style="border-color:rgba(34,211,238,.1)">
+        <div class="card-title mb-1" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Operational Resilience Index</div>
+        <div class="text-sm text-muted">No assessment on record.</div>
+      </div>
+      <% } %>
+
       <div class="card mb-3">
         <div class="card-title mb-3">Client Info</div>
         <div style="display:flex;flex-direction:column;gap:12px">
