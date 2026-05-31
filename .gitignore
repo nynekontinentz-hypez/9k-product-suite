@@ -4,3 +4,6 @@ node_modules/
 *.db-journal
 *.db-shm
 *.db-wal
+undefined
+undefined-shm
+undefined-wal
