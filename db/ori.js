@@ -32,4 +32,17 @@ async function getAssessmentById(id, clientId) {
   );
 }
 
-module.exports = { saveAssessment, getLatestAssessment, getAssessmentHistory, getAssessmentById };
+async function getLatestScoresForAll() {
+  const rows = await query(
+    `SELECT oa.client_id, oa.overall_score, oa.created_at
+     FROM ori_assessments oa
+     INNER JOIN (
+       SELECT client_id, MAX(id) AS max_id FROM ori_assessments GROUP BY client_id
+     ) latest ON oa.client_id = latest.client_id AND oa.id = latest.max_id`
+  );
+  const map = {};
+  for (const row of rows) map[row.client_id] = row;
+  return map;
+}
+
+module.exports = { saveAssessment, getLatestAssessment, getAssessmentHistory, getAssessmentById, getLatestScoresForAll };

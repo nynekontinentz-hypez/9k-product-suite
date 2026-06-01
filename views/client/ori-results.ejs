@@ -88,7 +88,7 @@
           <div class="ori-pillar-icon">◉</div>
           <div class="ori-pillar-label">Identity &amp; Access</div>
         </div>
-        <div class="ori-pillar-score"><%= identity.toFixed(1) %></div>
+        <div class="ori-pillar-score" style="color:<%= iLevel.color %>"><%= identity.toFixed(1) %></div>
         <div class="ori-bar-track">
           <div class="ori-bar-fill<%= identity < 4 ? ' crimson' : identity < 6 ? ' orange' : '' %>"
             style="width:0%" data-target="<%= (identity / 10 * 100).toFixed(0) %>%"></div>
@@ -101,7 +101,7 @@
           <div class="ori-pillar-icon gold">◈</div>
           <div class="ori-pillar-label">Data Integrity &amp; Continuity</div>
         </div>
-        <div class="ori-pillar-score gold"><%= continuity.toFixed(1) %></div>
+        <div class="ori-pillar-score gold" style="color:<%= cLevel.color %>"><%= continuity.toFixed(1) %></div>
         <div class="ori-bar-track">
           <div class="ori-bar-fill gold<%= continuity < 4 ? ' crimson' : continuity < 6 ? ' orange' : '' %>"
             style="width:0%" data-target="<%= (continuity / 10 * 100).toFixed(0) %>%"></div>
@@ -114,7 +114,7 @@
           <div class="ori-pillar-icon em">◎</div>
           <div class="ori-pillar-label">Operational Resilience</div>
         </div>
-        <div class="ori-pillar-score em"><%= resilience.toFixed(1) %></div>
+        <div class="ori-pillar-score em" style="color:<%= rLevel.color %>"><%= resilience.toFixed(1) %></div>
         <div class="ori-bar-track">
           <div class="ori-bar-fill em<%= resilience < 4 ? ' crimson' : resilience < 6 ? ' orange' : '' %>"
             style="width:0%" data-target="<%= (resilience / 10 * 100).toFixed(0) %>%"></div>

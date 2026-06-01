@@ -11,7 +11,7 @@
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Company</th><th>Contact</th><th>Email</th><th>Plan</th><th>Health</th><th>Endpoints</th><th>Since</th>
+          <th>Company</th><th>Contact</th><th>Email</th><th>Plan</th><th>ORI Score</th><th>Endpoints</th><th>Since</th>
         </tr></thead>
         <tbody>
           <% if (clients.length === 0) { %>
@@ -30,8 +30,15 @@
               <% } %>
             </td>
             <td>
-              <% var health = c.account_health || 'good'; %>
-              <span class="badge badge-<%= health === 'good' ? 'closed' : health === 'at-risk' ? 'high' : 'normal' %>"><%= health %></span>
+              <% if (c.oriLatest) {
+                const oriScore = parseFloat(c.oriLatest.overall_score);
+                const oriLvl = getScoreLevel(oriScore);
+              %>
+              <span style="font-weight:600;color:<%= oriLvl.color %>"><%= oriScore.toFixed(1) %></span>
+              <span class="text-muted text-xs" style="margin-left:4px"><%= oriLvl.label %></span>
+              <% } else { %>
+              <span class="text-muted text-xs">—</span>
+              <% } %>
             </td>
             <td class="text-muted"><%= c.endpoint_count || 0 %></td>
             <td class="text-muted text-sm"><%= new Date(c.created_at).toLocaleDateString() %></td>

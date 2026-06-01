@@ -10,30 +10,34 @@ const tiers = require('../db/tiers');
 const stats = require('../db/stats');
 const mailer = require('../lib/mailer');
 const audit = require('../middleware/audit');
+const oriDb = require('../db/ori');
+const { getScoreLevel } = require('../lib/ori-engine');
 
 router.use(requireAdmin);
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
 
 router.get('/', async (req, res) => {
-  const [overview, allClients, activeTickets] = await Promise.all([
+  const [overview, allClients, activeTickets, oriScores] = await Promise.all([
     stats.overview(),
     clients.findAll(),
-    // Show both open and in_progress so nothing is invisible on the dashboard
     tickets.findAll(),
+    oriDb.getLatestScoresForAll(),
   ]);
   const actionable = activeTickets.filter(t => t.status === 'open' || t.status === 'in_progress');
+  const clientsWithOri = allClients.map(c => ({ ...c, oriLatest: oriScores[c.id] || null }));
   res.render('admin/dashboard', {
-    user: req.session.admin, overview, clients: allClients,
-    tickets: actionable.slice(0, 10),
+    user: req.session.admin, overview, clients: clientsWithOri,
+    tickets: actionable.slice(0, 10), getScoreLevel,
   });
 });
 
 // ── Clients ──────────────────────────────────────────────────────────────────
 
 router.get('/clients', async (req, res) => {
-  const all = await clients.findAll();
-  res.render('admin/clients', { user: req.session.admin, clients: all });
+  const [all, oriScores] = await Promise.all([clients.findAll(), oriDb.getLatestScoresForAll()]);
+  const clientsWithOri = all.map(c => ({ ...c, oriLatest: oriScores[c.id] || null }));
+  res.render('admin/clients', { user: req.session.admin, clients: clientsWithOri, getScoreLevel });
 });
 
 router.get('/clients/new', async (req, res) => {
@@ -64,19 +68,20 @@ router.post('/clients/new', async (req, res) => {
 const playbooks = require('../db/playbooks');
 
 router.get('/clients/:id', async (req, res) => {
-  const [client, clientTickets, clientContracts] = await Promise.all([
+  const [client, clientTickets, clientContracts, oriLatest] = await Promise.all([
     clients.findById(req.params.id),
     tickets.findByClient(req.params.id),
     contracts.findByClient(req.params.id),
+    oriDb.getLatestAssessment(req.params.id),
   ]);
   if (!client) return res.status(404).render('error', { message: 'Client not found.', status: 404, user: req.session.admin });
-  
+
   const matchingPlaybook = playbooks.findByIndustry(client.industry);
 
   res.render('admin/client-detail', {
     user: req.session.admin, client, tickets: clientTickets, contracts: clientContracts,
     created: req.query.created === '1',
-    playbook: matchingPlaybook
+    playbook: matchingPlaybook, oriLatest, getScoreLevel,
   });
 });
 
