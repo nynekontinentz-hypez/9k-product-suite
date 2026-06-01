@@ -30,7 +30,12 @@ function getDb() {
 async function query(sql, params = []) {
   if (isPostgres) {
     const pool = getDb();
-    const res = await pool.query(sql, params);
+    const isOrIgnore = /^\s*INSERT\s+OR\s+IGNORE\s+INTO\b/i.test(sql);
+    let pgSql = sql.replace(/^\s*INSERT\s+OR\s+IGNORE\s+INTO\b/i, 'INSERT INTO');
+    let i = 0;
+    pgSql = pgSql.replace(/\?/g, () => `$${++i}`);
+    if (isOrIgnore) pgSql = pgSql.trimEnd() + ' ON CONFLICT DO NOTHING';
+    const res = await pool.query(pgSql, params);
     return res.rows;
   } else {
     const db = getDb();
@@ -53,8 +58,17 @@ async function queryOne(sql, params = []) {
 }
 
 // Run raw DDL (CREATE TABLE, etc.) — node:sqlite uses .exec() for multi-statement
-function exec(sql) {
-  if (isPostgres) return;
+async function exec(sql) {
+  if (isPostgres) {
+    const pool = getDb();
+    const pgSql = sql
+      .replace(/\bINTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT\b/gi, 'SERIAL PRIMARY KEY')
+      .replace(/\bTEXT\s+DEFAULT\s+\(datetime\s*\(\s*'now'\s*\)\s*\)/gi, 'TIMESTAMPTZ DEFAULT NOW()');
+    for (const stmt of pgSql.split(';').map(s => s.trim()).filter(Boolean)) {
+      await pool.query(stmt);
+    }
+    return;
+  }
   getDb().exec(sql);
 }
 

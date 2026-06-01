@@ -84,9 +84,9 @@
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:.75rem;text-align:center">
-          <% [['Identity',parseFloat(oriLatest.identity_score),'var(--accent)'],['Continuity',parseFloat(oriLatest.continuity_score),'var(--amber)'],['Resilience',parseFloat(oriLatest.resilience_score),'var(--green)']].forEach(function(p){ %>
+          <% [['Identity',parseFloat(oriLatest.identity_score)],['Continuity',parseFloat(oriLatest.continuity_score)],['Resilience',parseFloat(oriLatest.resilience_score)]].forEach(function(p){ %>
           <div style="background:var(--surface2);border-radius:6px;padding:6px 4px">
-            <div style="font-weight:700;color:<%= p[2] %>"><%= p[1].toFixed(1) %></div>
+            <div style="font-weight:700;color:<%= getScoreLevel(p[1]).color %>"><%= p[1].toFixed(1) %></div>
             <div style="color:var(--muted)"><%= p[0] %></div>
           </div>
           <% }) %>

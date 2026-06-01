@@ -5,7 +5,7 @@ const fs = require('fs');
 const { query, exec } = require('./db');
 
 async function run() {
-  exec(`
+  await exec(`
     CREATE TABLE IF NOT EXISTS _migrations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
@@ -29,7 +29,7 @@ async function run() {
     if (typeof migration.up === 'function') {
       await migration.up({ query, exec });
     } else {
-      exec(migration.up);
+      await exec(migration.up);
     }
     await query(`INSERT INTO _migrations (name) VALUES (?)`, [name]);
     console.log(`  apply ${name}`);
@@ -44,12 +44,12 @@ async function seedDefaults() {
   const tiers = await query(`SELECT id FROM service_tiers LIMIT 1`);
   if (tiers.length > 0) return;
 
-  exec(`INSERT INTO service_tiers (name, description, monthly_price, features) VALUES
+  await exec(`INSERT INTO service_tiers (name, description, monthly_price, features) VALUES
     ('Essentials', 'Basic monitoring and support for small teams', 299, 'Endpoint monitoring,Remote support,Monthly check-in'),
     ('Professional', 'Full managed IT + M365 administration', 599, 'All Essentials,Microsoft 365 admin,Cybersecurity baseline,Priority tickets'),
     ('Enterprise', 'Comprehensive MSP coverage', 999, 'All Professional,MFA enforcement,Security awareness training,Dedicated technician')`);
 
-  exec(`INSERT INTO sla_tiers (name, response_hours, resolution_hours, description) VALUES
+  await exec(`INSERT INTO sla_tiers (name, response_hours, resolution_hours, description) VALUES
     ('Critical', 1, 4, 'System down, business impact'),
     ('High', 4, 24, 'Major degradation'),
     ('Normal', 8, 72, 'Standard support request'),
