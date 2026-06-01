@@ -15,6 +15,10 @@ services:
           property: connectionString
       - key: PORTAL_URL
         sync: false
+      # Set in the Render dashboard — used once to seed the first admin login
+      # (admin@9ksystems.net). Without it, admin seeding is skipped in production.
+      - key: ADMIN_SEED_PASSWORD
+        sync: false
 
 databases:
   - name: 9k-portal-db
