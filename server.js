@@ -4,8 +4,14 @@ const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
 
+const db = require('./db');
+
 const app = express();
 const PORT = process.env.PORT || 3003;
+
+// Behind Render's TLS-terminating proxy, trust X-Forwarded-Proto so Express
+// recognises HTTPS and will issue Secure session cookies.
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 
 // Guard: crash loudly in production if SESSION_SECRET is missing
 if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
@@ -32,19 +38,25 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-// Dev: MemoryStore (lost on restart — fine for local preview)
-// Production: swap in a DB-backed store (connect-pg-simple or similar)
-app.use(session({
+// Dev: MemoryStore (lost on restart — fine for local preview).
+// Production (Postgres): connect-pg-simple keeps sessions in the DB so they
+// survive restarts and free-tier spin-downs.
+const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'dev-only-secret-not-for-production',
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 8 * 60 * 60 * 1000, // 8 hours
   },
-}));
+};
+if (db.isPostgres) {
+  const PgStore = require('connect-pg-simple')(session);
+  sessionConfig.store = new PgStore({ pool: db.getDb(), createTableIfMissing: true });
+}
+app.use(session(sessionConfig));
 
 // ── Analytics middleware ──────────────────────────────────────────────────────
 app.use(require('./middleware/analytics'));
