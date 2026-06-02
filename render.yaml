@@ -22,4 +22,4 @@ services:
 
 databases:
   - name: 9k-portal-db
-    plan: free
+    plan: starter
