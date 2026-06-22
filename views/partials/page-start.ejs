@@ -30,9 +30,6 @@
         <a href="/admin/tickets" class="<%= activePath && activePath.startsWith('/admin/tickets') ? 'active' : '' %>">
           <span class="icon">◎</span> Tickets
         </a>
-        <a href="/admin/playbooks" class="<%= activePath && activePath.startsWith('/admin/playbooks') ? 'active' : '' %>">
-          <span class="icon">▤</span> Playbooks
-        </a>
       <% } else { %>
         <div class="sidebar-section">Portal</div>
         <a href="/client" class="<%= activePath === '/client' ? 'active' : '' %>">

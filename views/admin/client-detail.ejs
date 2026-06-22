@@ -102,7 +102,7 @@
       <div class="card mb-3">
         <div class="card-title mb-3">Client Info</div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <div class="detail-item"><label>Primary Contact</label><p><%= client.primary_contact_name %><% if (client.primary_contact_role) { %> · <%= client.primary_contact_role %><% } %></p></div>
+          <div class="detail-item"><label>Primary Contact</label><p><%= client.primary_contact_name %></p></div>
           <div class="detail-item"><label>Email</label><p><%= client.primary_contact_email %></p></div>
           <% if (client.phone) { %>
           <div class="detail-item"><label>Phone</label><p><%= client.phone %></p></div>
@@ -114,65 +114,19 @@
             —
             <% } %>
           </p></div>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-title mb-3">Digital Intake Profile</div>
-        <% if (playbook) { %>
-        <div class="alert alert-info py-2 mb-3" style="font-size: 0.8rem; border-color: var(--accent); background: rgba(255,122,0,0.1);">
-          <strong>Matched Playbook:</strong> <a href="/admin/playbooks/<%= playbook.id %>" class="text-accent underline"><%= playbook.name %></a>
-        </div>
-        <% } %>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <div class="detail-item"><label>Industry</label><p><%= client.industry || '—' %></p></div>
-          <div class="detail-item"><label>Location</label><p><%= client.city || '—' %></p></div>
-          <% if (client.website) { %>
-          <div class="detail-item"><label>Website</label><p><a href="https://<%= client.website.replace('https://','').replace('http://','') %>" target="_blank" class="text-accent"><%= client.website %></a></p></div>
-          <% } %>
+          <div class="detail-item"><label>Environment</label><p><%= client.environment || '—' %></p></div>
           <div class="detail-item"><label>Endpoints</label><p><%= client.endpoint_count || 0 %></p></div>
-          <div class="detail-item"><label>Business Age</label><p><%= client.business_age || '—' %></p></div>
-          
-          <div class="detail-item">
-            <label>Tech Stack</label>
-            <div class="flex flex-wrap gap-1 mt-1">
-              <% if (client.uses_microsoft_365) { %><span class="badge badge-normal">M365</span><% } %>
-              <% if (client.uses_google_workspace) { %><span class="badge badge-normal">Google Workspace</span><% } %>
-              <% if (client.uses_azure_ad) { %><span class="badge badge-normal">Azure AD</span><% } %>
-              <% if (client.uses_cloud_backup) { %><span class="badge badge-normal">Backup</span><% } %>
-              <% if (client.uses_antivirus) { %><span class="badge badge-normal">AV</span><% } %>
-              <% if (client.uses_firewall) { %><span class="badge badge-normal">Firewall</span><% } %>
-              <% if (client.uses_vpn) { %><span class="badge badge-normal">VPN</span><% } %>
-              <% if (client.uses_onsite_server) { %><span class="badge badge-normal">Server</span><% } %>
-              <% if (client.os_windows) { %><span class="badge badge-secondary">Windows</span><% } %>
-              <% if (client.os_mac) { %><span class="badge badge-secondary">macOS</span><% } %>
-            </div>
-          </div>
-
-          <div class="detail-item">
-            <label>Interests</label>
-            <div class="flex flex-wrap gap-1 mt-1">
-              <% if (client.interest_managed_it) { %><span class="badge badge-tier">Managed IT</span><% } %>
-              <% if (client.interest_cybersecurity) { %><span class="badge badge-tier">Security</span><% } %>
-              <% if (client.interest_compliance) { %><span class="badge badge-tier">Compliance</span><% } %>
-            </div>
-          </div>
-
-          <div class="detail-item"><label>Budget</label><p><%= client.budget_range ? client.budget_range.replace('_','–').replace('plus','+') : '—' %></p></div>
-          <div class="detail-item"><label>Timeline</label><p><%= client.timeline || '—' %></p></div>
-          
-          <% if (client.pain_point) { %>
-          <div class="detail-item"><label>Pain Point</label><p class="text-sm italic">"<%= client.pain_point %>"</p></div>
+          <% if (client.uses_microsoft_365) { %>
+          <div class="detail-item"><label>M365</label><p>Active</p></div>
+          <% } %>
+          <% if (client.uses_azure_ad) { %>
+          <div class="detail-item"><label>Azure AD</label><p>Active</p></div>
+          <% } %>
+          <% if (client.emergency_contact_name) { %>
+          <div class="detail-item"><label>Emergency Contact</label><p><%= client.emergency_contact_name %><% if (client.emergency_contact_phone) { %> · <%= client.emergency_contact_phone %><% } %></p></div>
           <% } %>
         </div>
       </div>
-
-      <% if (client.emergency_contact_name) { %>
-      <div class="card mb-3">
-        <div class="card-title mb-2">Emergency Contact</div>
-        <p class="text-sm"><%= client.emergency_contact_name %><% if (client.emergency_contact_phone) { %> · <%= client.emergency_contact_phone %><% } %></p>
-      </div>
-      <% } %>
 
       <% if (client.internal_notes) { %>
       <div class="card" style="border-color:var(--accent)">

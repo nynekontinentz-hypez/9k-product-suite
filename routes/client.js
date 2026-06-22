@@ -130,54 +130,12 @@ router.get('/onboarding', async (req, res) => {
 });
 
 router.post('/onboarding', async (req, res) => {
-  const {
-    industry, primary_contact_role, city, website, address, business_age,
-    os_windows, os_mac, os_chrome, os_mixed,
-    uses_microsoft_365, uses_google_workspace, uses_azure_ad, uses_cloud_backup,
-    uses_antivirus, uses_firewall, uses_vpn, uses_remote_work, uses_onsite_server,
-    pain_point,
-    interest_managed_it, interest_cybersecurity, interest_cloud, interest_m365,
-    interest_backup, interest_compliance, interest_vcio, interest_training,
-    budget_range, timeline,
-    compliance_hipaa, compliance_pci, compliance_soc2,
-    emergency_contact_name, emergency_contact_phone,
-    referral_source, previous_msp_experience
-  } = req.body;
-
-  const endpoint_count = parseInt(req.body.endpoint_count) || 0;
-
+  const { environment, endpoint_count, uses_azure_ad, uses_microsoft_365, emergency_contact_name, emergency_contact_phone } = req.body;
   await require('../db').query(
-    `UPDATE clients SET
-      industry = ?, primary_contact_role = ?, city = ?, website = ?, address = ?, business_age = ?,
-      endpoint_count = ?,
-      os_windows = ?, os_mac = ?, os_chrome = ?, os_mixed = ?,
-      uses_microsoft_365 = ?, uses_google_workspace = ?, uses_azure_ad = ?, uses_cloud_backup = ?,
-      uses_antivirus = ?, uses_firewall = ?, uses_vpn = ?, uses_remote_work = ?, uses_onsite_server = ?,
-      pain_point = ?,
-      interest_managed_it = ?, interest_cybersecurity = ?, interest_cloud = ?, interest_m365 = ?,
-      interest_backup = ?, interest_compliance = ?, interest_vcio = ?, interest_training = ?,
-      budget_range = ?, timeline = ?,
-      compliance_hipaa = ?, compliance_pci = ?, compliance_soc2 = ?,
-      emergency_contact_name = ?, emergency_contact_phone = ?,
-      referral_source = ?, previous_msp_experience = ?
-    WHERE id = ?`,
-    [
-      industry || null, primary_contact_role || null, city || null, website || null, address || null, business_age || null,
-      endpoint_count,
-      os_windows ? 1 : 0, os_mac ? 1 : 0, os_chrome ? 1 : 0, os_mixed ? 1 : 0,
-      uses_microsoft_365 ? 1 : 0, uses_google_workspace ? 1 : 0, uses_azure_ad ? 1 : 0, uses_cloud_backup ? 1 : 0,
-      uses_antivirus ? 1 : 0, uses_firewall ? 1 : 0, uses_vpn ? 1 : 0, uses_remote_work ? 1 : 0, uses_onsite_server ? 1 : 0,
-      pain_point || null,
-      interest_managed_it ? 1 : 0, interest_cybersecurity ? 1 : 0, interest_cloud ? 1 : 0, interest_m365 ? 1 : 0,
-      interest_backup ? 1 : 0, interest_compliance ? 1 : 0, interest_vcio ? 1 : 0, interest_training ? 1 : 0,
-      budget_range || 'unsure', timeline || 'exploring',
-      compliance_hipaa ? 1 : 0, compliance_pci ? 1 : 0, compliance_soc2 ? 1 : 0,
-      emergency_contact_name || null, emergency_contact_phone || null,
-      referral_source || null, previous_msp_experience || null,
-      req.session.client.id
-    ]
+    `UPDATE clients SET environment = ?, endpoint_count = ?, uses_azure_ad = ?, uses_microsoft_365 = ?, emergency_contact_name = ?, emergency_contact_phone = ? WHERE id = ?`,
+    [environment, parseInt(endpoint_count) || 0, uses_azure_ad ? 1 : 0, uses_microsoft_365 ? 1 : 0,
+     emergency_contact_name || null, emergency_contact_phone || null, req.session.client.id]
   );
-
   const client = await clients.findById(req.session.client.id);
   res.render('client/onboarding', { user: req.session.client, client, success: true, error: null });
 });

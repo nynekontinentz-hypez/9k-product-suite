@@ -65,8 +65,6 @@ router.post('/clients/new', async (req, res) => {
   res.redirect(`/admin/clients/${clientId}?created=1`);
 });
 
-const playbooks = require('../db/playbooks');
-
 router.get('/clients/:id', async (req, res) => {
   const [client, clientTickets, clientContracts, oriLatest] = await Promise.all([
     clients.findById(req.params.id),
@@ -75,13 +73,10 @@ router.get('/clients/:id', async (req, res) => {
     oriDb.getLatestAssessment(req.params.id),
   ]);
   if (!client) return res.status(404).render('error', { message: 'Client not found.', status: 404, user: req.session.admin });
-
-  const matchingPlaybook = playbooks.findByIndustry(client.industry);
-
   res.render('admin/client-detail', {
     user: req.session.admin, client, tickets: clientTickets, contracts: clientContracts,
     created: req.query.created === '1',
-    playbook: matchingPlaybook, oriLatest, getScoreLevel,
+    oriLatest, getScoreLevel,
   });
 });
 

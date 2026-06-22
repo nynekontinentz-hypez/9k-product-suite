@@ -1,212 +1,57 @@
 <%- include('../partials/page-start', { title: 'Environment', user, isAdmin: false, activePath: '/client/onboarding' }) %>
 
 <div class="topbar">
-  <div class="topbar-title">Digital Onboarding & Intake</div>
+  <div class="topbar-title">Environment Details</div>
 </div>
 <div class="page">
-  <div class="card" style="max-width:800px">
-    <div class="mb-4">
-      <div class="font-medium text-lg mb-1">Your IT Intake Profile</div>
-      <div class="text-muted text-sm">This information helps us prepare your IT proposal and support strategy. Update it anytime.</div>
+  <div class="card" style="max-width:640px">
+    <div class="mb-3">
+      <div class="font-medium mb-1">Your IT Environment</div>
+      <div class="text-muted text-sm">This helps us diagnose and resolve issues faster. Update it anytime.</div>
     </div>
-    
     <% if (success) { %>
-    <div class="alert alert-success">Intake profile updated successfully. Thank you!</div>
+    <div class="alert alert-success">Environment details updated. Thank you!</div>
     <% } %>
     <% if (error) { %>
     <div class="alert alert-error"><%= error %></div>
     <% } %>
 
     <form method="POST" action="/client/onboarding">
-      <!-- A — ABOUT YOUR BUSINESS -->
-      <div class="mb-6">
-        <h3 class="text-md font-bold mb-3 border-b pb-1">A — About Your Business</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="form-group">
-            <label>Industry / Sector</label>
-            <input type="text" name="industry" placeholder="e.g. Healthcare, Legal" value="<%= client && client.industry || '' %>">
-          </div>
-          <div class="form-group">
-            <label>Primary Contact Role</label>
-            <input type="text" name="primary_contact_role" placeholder="e.g. Owner, Manager" value="<%= client && client.primary_contact_role || '' %>">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="form-group">
-            <label>City / Location</label>
-            <input type="text" name="city" placeholder="e.g. Miami, FL" value="<%= client && client.city || '' %>">
-          </div>
-          <div class="form-group">
-            <label>Website</label>
-            <input type="text" name="website" placeholder="e.g. yourbusiness.com" value="<%= client && client.website || '' %>">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Mailing / Business Address</label>
-          <input type="text" name="address" placeholder="Street, City, State, ZIP" value="<%= client && client.address || '' %>">
-        </div>
-      </div>
-
-      <!-- B — YOUR CURRENT IT SETUP -->
-      <div class="mb-6">
-        <h3 class="text-md font-bold mb-3 border-b pb-1">B — Your Current IT Setup</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="form-group">
-            <label>Approx. number of endpoints</label>
-            <input type="number" name="endpoint_count" min="0" value="<%= client && client.endpoint_count || 0 %>">
-          </div>
-          <div class="form-group">
-            <label>How long in business?</label>
-            <input type="text" name="business_age" placeholder="e.g. 4 years" value="<%= client && client.business_age || '' %>">
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label>Operating Systems (check all that apply)</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="form-check">
-              <input type="checkbox" name="os_windows" value="1" <%= client && client.os_windows ? 'checked' : '' %>> Windows 10 / 11
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="os_mac" value="1" <%= client && client.os_mac ? 'checked' : '' %>> macOS
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="os_chrome" value="1" <%= client && client.os_chrome ? 'checked' : '' %>> ChromeOS
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="os_mixed" value="1" <%= client && client.os_mixed ? 'checked' : '' %>> Mixed / Unsure
-            </label>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Services & Solutions Currently Used</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="form-check">
-              <input type="checkbox" name="uses_microsoft_365" value="1" <%= client && client.uses_microsoft_365 ? 'checked' : '' %>> Microsoft 365 / Office
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="uses_google_workspace" value="1" <%= client && client.uses_google_workspace ? 'checked' : '' %>> Google Workspace
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="uses_azure_ad" value="1" <%= client && client.uses_azure_ad ? 'checked' : '' %>> Azure AD / Entra ID
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="uses_cloud_backup" value="1" <%= client && client.uses_cloud_backup ? 'checked' : '' %>> Cloud Backup
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="uses_antivirus" value="1" <%= client && client.uses_antivirus ? 'checked' : '' %>> Antivirus / Endpoint Protection
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="uses_firewall" value="1" <%= client && client.uses_firewall ? 'checked' : '' %>> Business Firewall
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="uses_vpn" value="1" <%= client && client.uses_vpn ? 'checked' : '' %>> VPN
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="uses_onsite_server" value="1" <%= client && client.uses_onsite_server ? 'checked' : '' %>> On-site Server
-            </label>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Biggest IT pain point right now</label>
-          <textarea name="pain_point" rows="2" placeholder="e.g. We have no backups, internet drops..."><%= client && client.pain_point || '' %></textarea>
-        </div>
-      </div>
-
-      <!-- C — WHAT YOU'RE LOOKING FOR -->
-      <div class="mb-6">
-        <h3 class="text-md font-bold mb-3 border-b pb-1">C — What You're Looking For</h3>
-        <div class="form-group">
-          <label>Services of interest</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="form-check">
-              <input type="checkbox" name="interest_managed_it" value="1" <%= client && client.interest_managed_it ? 'checked' : '' %>> Managed IT Support
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="interest_cybersecurity" value="1" <%= client && client.interest_cybersecurity ? 'checked' : '' %>> Cybersecurity
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="interest_m365" value="1" <%= client && client.interest_m365 ? 'checked' : '' %>> Microsoft 365 Mgmt
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="interest_backup" value="1" <%= client && client.interest_backup ? 'checked' : '' %>> Backup & Recovery
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="interest_compliance" value="1" <%= client && client.interest_compliance ? 'checked' : '' %>> Compliance (HIPAA, etc.)
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="interest_vcio" value="1" <%= client && client.interest_vcio ? 'checked' : '' %>> IT Strategy / vCIO
-            </label>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div class="form-group">
-            <label>Approx. monthly budget</label>
-            <select name="budget_range">
-              <option value="under_500" <%= client && client.budget_range === 'under_500' ? 'selected' : '' %>>Under $500/mo</option>
-              <option value="500_1000" <%= client && client.budget_range === '500_1000' ? 'selected' : '' %>>$500 – $1,000/mo</option>
-              <option value="1000_2500" <%= client && client.budget_range === '1000_2500' ? 'selected' : '' %>>$1,000 – $2,500/mo</option>
-              <option value="2500_plus" <%= client && client.budget_range === '2500_plus' ? 'selected' : '' %>>$2,500+/mo</option>
-              <option value="unsure" <%= !client || client.budget_range === 'unsure' ? 'selected' : '' %>>Not sure yet</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Target start date</label>
-            <select name="timeline">
-              <option value="asap" <%= client && client.timeline === 'asap' ? 'selected' : '' %>>As soon as possible</option>
-              <option value="30_days" <%= client && client.timeline === '30_days' ? 'selected' : '' %>>Within 30 days</option>
-              <option value="60_90_days" <%= client && client.timeline === '60_90_days' ? 'selected' : '' %>>Within 60-90 days</option>
-              <option value="exploring" <%= !client || client.timeline === 'exploring' ? 'selected' : '' %>>Just exploring</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Compliance Requirements</label>
-          <div class="flex gap-4">
-            <label class="form-check">
-              <input type="checkbox" name="compliance_hipaa" value="1" <%= client && client.compliance_hipaa ? 'checked' : '' %>> HIPAA
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="compliance_pci" value="1" <%= client && client.compliance_pci ? 'checked' : '' %>> PCI
-            </label>
-            <label class="form-check">
-              <input type="checkbox" name="compliance_soc2" value="1" <%= client && client.compliance_soc2 ? 'checked' : '' %>> SOC 2
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- D — EMERGENCY CONTACT -->
-      <div class="mb-6">
-        <h3 class="text-md font-bold mb-3 border-b pb-1">D — Emergency Contact</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="form-group">
-            <label>Emergency Contact Name</label>
-            <input type="text" name="emergency_contact_name" placeholder="Name" value="<%= client && client.emergency_contact_name || '' %>">
-          </div>
-          <div class="form-group">
-            <label>Emergency Contact Phone</label>
-            <input type="text" name="emergency_contact_phone" placeholder="Phone" value="<%= client && client.emergency_contact_phone || '' %>">
-          </div>
-        </div>
-      </div>
-
       <div class="form-group">
-        <label>How did you hear about us?</label>
-        <input type="text" name="referral_source" value="<%= client && client.referral_source || '' %>">
+        <label>Environment type</label>
+        <select name="environment">
+          <option value="on-prem" <%= client && client.environment === 'on-prem' ? 'selected' : '' %>>On-premises only</option>
+          <option value="cloud" <%= client && client.environment === 'cloud' ? 'selected' : '' %>>Cloud only</option>
+          <option value="hybrid" <%= !client || client.environment === 'hybrid' || !client.environment ? 'selected' : '' %>>Hybrid (on-prem + cloud)</option>
+          <option value="remote" <%= client && client.environment === 'remote' ? 'selected' : '' %>>Fully remote / no office</option>
+        </select>
       </div>
-
       <div class="form-group">
-        <label>Previous MSP experience (what worked/didn't?)</label>
-        <textarea name="previous_msp_experience" rows="2" placeholder="e.g. Previous provider was slow..."><%= client && client.previous_msp_experience || '' %></textarea>
+        <label>Approximate number of endpoints (computers, laptops, servers)</label>
+        <input type="number" name="endpoint_count" min="0" placeholder="e.g. 12" value="<%= client && client.endpoint_count || '' %>">
       </div>
-
+      <div class="form-group">
+        <label class="form-check">
+          <input type="checkbox" name="uses_microsoft_365" value="1" <%= client && client.uses_microsoft_365 ? 'checked' : '' %>>
+          We use Microsoft 365
+        </label>
+      </div>
+      <div class="form-group">
+        <label class="form-check">
+          <input type="checkbox" name="uses_azure_ad" value="1" <%= client && client.uses_azure_ad ? 'checked' : '' %>>
+          We use Azure Active Directory / Entra ID
+        </label>
+      </div>
       <div class="divider"></div>
-      <button type="submit" class="btn btn-primary w-full">Save & Submit Intake Profile</button>
+      <div class="form-group">
+        <label>Emergency contact name</label>
+        <input type="text" name="emergency_contact_name" placeholder="Who to call for critical issues after hours" value="<%= client && client.emergency_contact_name || '' %>">
+      </div>
+      <div class="form-group">
+        <label>Emergency contact phone</label>
+        <input type="text" name="emergency_contact_phone" placeholder="+1 555 000 0000" value="<%= client && client.emergency_contact_phone || '' %>">
+      </div>
+      <button type="submit" class="btn btn-primary">Save environment details</button>
     </form>
   </div>
 </div>

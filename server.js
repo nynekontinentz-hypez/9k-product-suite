@@ -65,7 +65,6 @@ app.use(require('./middleware/analytics'));
 app.use('/', require('./routes/auth'));
 app.use('/client', require('./routes/client'));
 app.use('/admin', require('./routes/admin'));
-app.use('/admin/playbooks', require('./routes/playbooks'));
 
 // ── Root: landing page for guests, redirect for authenticated users ────────────
 app.get('/', (req, res) => {
